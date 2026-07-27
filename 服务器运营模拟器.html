@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#EEF2F1">
+<title>运营你的服务器模拟器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.loli.net/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200&display=block" rel="stylesheet">
+<style>
+:root{
+  --primary:#00696E;--on-primary:#fff;--primary-container:#9CF0F5;--on-primary-container:#002022;
+  --secondary:#4A6365;--on-secondary:#fff;--secondary-container:#CCE8EA;--on-secondary-container:#041F21;
+  --tertiary:#7A5900;--on-tertiary:#fff;--tertiary-container:#FFDF9E;--on-tertiary-container:#261A00;
+  --error:#BA1A1A;--on-error:#fff;--error-container:#FFDAD6;--on-error-container:#410002;
+  --surface:#FAFDFC;--on-surface:#191C1C;--surface-variant:#DBE5E4;--on-surface-variant:#3F4948;
+  --sc-lowest:#FFFFFF;--sc-low:#F4F7F6;--sc:#EEF2F1;--sc-high:#E8ECEB;--sc-highest:#E2E7E6;
+  --outline:#6F7978;--outline-variant:#C3CECD;
+  --inverse-surface:#2D3131;--inverse-on-surface:#EFF1F0;
+  --ok:#1E6B3C;--warn:#8F5A00;
+  --scrim:rgba(12,20,20,.45);
+  --term-bg:#0D1313;--term-fg:#B9C8C7;
+  --sh1:0 1px 2px rgba(15,30,30,.25),0 1px 3px 1px rgba(15,30,30,.10);
+  --sh2:0 1px 2px rgba(15,30,30,.25),0 2px 6px 2px rgba(15,30,30,.10);
+  --sh3:0 4px 8px 3px rgba(15,30,30,.10),0 1px 3px rgba(15,30,30,.24);
+  --appw:min(480px,100vw);
+}
+html.dark{
+  --primary:#80D3D8;--on-primary:#00373A;--primary-container:#004F53;--on-primary-container:#9CF0F5;
+  --secondary:#B0CCCE;--on-secondary:#1B3436;--secondary-container:#324B4D;--on-secondary-container:#CCE8EA;
+  --tertiary:#EAC16E;--on-tertiary:#412C00;--tertiary-container:#5D4200;--on-tertiary-container:#FFDF9E;
+  --error:#FFB4AB;--on-error:#690005;--error-container:#93000A;--on-error-container:#FFDAD6;
+  --surface:#101414;--on-surface:#DDE3E2;--surface-variant:#3F4948;--on-surface-variant:#BFC9C8;
+  --sc-lowest:#0B0F0F;--sc-low:#161B1B;--sc:#1A1F1F;--sc-high:#202525;--sc-highest:#252A2A;
+  --outline:#899392;--outline-variant:#3F4948;
+  --inverse-surface:#DDE3E2;--inverse-on-surface:#2D3131;
+  --ok:#7FD99A;--warn:#EAC16E;
+  --scrim:rgba(0,0,0,.62);
+  --term-bg:#0A0F0F;
+  --sh1:0 1px 2px rgba(0,0,0,.5),0 1px 3px 1px rgba(0,0,0,.3);
+  --sh2:0 1px 2px rgba(0,0,0,.5),0 2px 6px 2px rgba(0,0,0,.3);
+  --sh3:0 4px 8px 3px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Noto Sans SC',Roboto,system-ui,sans-serif;font-size:14px;color:var(--on-surface);
+  background:var(--surface);overscroll-behavior:none;touch-action:manipulation;
+  -webkit-font-smoothing:antialiased;user-select:none;
+}
+input,textarea,select{user-select:text;font-family:inherit}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(620px 420px at 108% -8%, color-mix(in srgb,var(--primary) 9%,transparent),transparent 70%),
+   radial-gradient(520px 400px at -18% 34%, color-mix(in srgb,var(--tertiary) 7%,transparent),transparent 70%);}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--outline-variant) 1px,transparent 1px),linear-gradient(90deg,var(--outline-variant) 1px,transparent 1px);
+  background-size:30px 30px;mask-image:radial-gradient(80% 60% at 50% 0%,rgba(0,0,0,.16),transparent);}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;
+  display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;
+  font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24;vertical-align:middle}
+.msr.f{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+.mono{font-family:'Roboto Mono',monospace}
+button{font-family:inherit;border:0;background:none;color:inherit;cursor:pointer}
+button[disabled]{opacity:.38;pointer-events:none}
+
+#app{position:relative;z-index:1;width:var(--appw);margin:0 auto;min-height:100dvh;background:var(--surface)}
+@media(min-width:520px){body{background:#141919}#app{box-shadow:0 0 0 1px var(--outline-variant),0 24px 70px rgba(0,0,0,.55)}}
+
+.ripple{position:relative;overflow:hidden}
+.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.14;transform:scale(0);
+  animation:rip .55s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+
+#topbar{position:sticky;top:0;z-index:30;background:var(--sc);border-bottom:1px solid var(--outline-variant);
+  padding:10px 12px 10px;padding-top:calc(10px + env(safe-area-inset-top))}
+.tb-row1{display:flex;align-items:center;gap:8px}
+.tb-logo{color:var(--primary);font-size:22px}
+.tb-title{flex:1;min-width:0}
+.tb-name{font-size:14px;font-weight:900;letter-spacing:.5px}
+.tb-sub{font-size:9.5px;letter-spacing:1.5px;color:var(--on-surface-variant);font-weight:500;margin-top:1px}
+.tb-sub b{color:var(--primary);font-weight:700}
+.icon-btn{width:40px;height:40px;border-radius:20px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--on-surface-variant);flex:none;transition:background .15s}
+.icon-btn:active{background:var(--surface-variant)}
+.tb-row2{display:flex;align-items:flex-end;justify-content:space-between;margin-top:8px;gap:8px}
+.money{font-family:'Roboto Mono',monospace;font-size:27px;font-weight:700;letter-spacing:-.5px;color:var(--on-surface);transition:color .3s}
+.money.neg{color:var(--error)}
+.mini-chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.mini-chip{display:inline-flex;align-items:center;gap:4px;background:var(--sc-high);border-radius:8px;
+  padding:5px 8px;font-size:11.5px;font-weight:500;color:var(--on-surface-variant)}
+.mini-chip .msr{font-size:15px}
+.mini-chip b{color:var(--on-surface);font-family:'Roboto Mono',monospace}
+.mini-chip .em{font-size:10px;font-family:'Roboto Mono',monospace;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-row3{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px}
+.seg{display:flex;flex:1;border:1px solid var(--outline);border-radius:20px;overflow:hidden;max-width:290px}
+.seg button{flex:1;min-width:44px;height:36px;font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center;
+  color:var(--on-surface);border-right:1px solid var(--outline-variant);transition:background .18s}
+.seg button:last-child{border-right:0}
+.seg button .msr{font-size:17px}
+.seg button.on{background:var(--secondary-container);color:var(--on-secondary-container)}
+.seg button.on::before{content:'check';font-family:'Material Symbols Rounded';font-size:14px;margin-right:3px;
+  font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 20}
+.seg-sm{max-width:198px}
+.seg-sm button{height:32px;font-size:11.5px;min-width:0}
+.day-count{font-size:12px;font-weight:700;color:var(--on-surface-variant);white-space:nowrap}
+
+.page{display:none;padding:12px 12px 176px}
+.page.on{display:block}
+#page-logs.on{display:flex;flex-direction:column}
+.page.enter>*{animation:cardIn .32s both}
+.page.enter>*:nth-child(2){animation-delay:.04s}.page.enter>*:nth-child(3){animation-delay:.08s}
+.page.enter>*:nth-child(4){animation-delay:.12s}.page.enter>*:nth-child(5){animation-delay:.16s}
+.page.enter>*:nth-child(6){animation-delay:.2s}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.card{border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.card.elevated{background:var(--sc-low);box-shadow:var(--sh1)}
+.card.filled{background:var(--sc-high)}
+.card.outlined{background:var(--surface);border:1px solid var(--outline-variant)}
+.card-title{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--on-surface-variant);margin-bottom:10px}
+.card-title .msr{font-size:18px;color:var(--primary)}
+.card-title em{margin-left:auto;font-style:normal;font-size:11px;font-weight:600;color:var(--primary)}
+.sec-title{font-size:13px;font-weight:800;color:var(--on-surface-variant);margin:16px 4px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.sec-title em{font-style:normal;font-size:11px;font-weight:600}
+
+.status-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.label{font-size:11px;font-weight:600;letter-spacing:.6px;color:var(--on-surface-variant)}
+.status-name{font-size:23px;font-weight:900;margin-top:2px;display:flex;align-items:center;gap:8px}
+.status-name::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--ok);flex:none}
+.status-name.ok{color:var(--ok)}.status-name.ok::before{background:var(--ok);animation:pulse 2s infinite}
+.status-name.warn{color:var(--warn)}.status-name.warn::before{background:var(--warn);animation:pulse 1.2s infinite}
+.status-name.err{color:var(--error)}.status-name.err::before{background:var(--error);animation:pulse .8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 40%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.temp-ring{display:flex;align-items:baseline;gap:2px;background:var(--sc-high);border-radius:14px;padding:8px 12px;transition:background .4s,color .4s}
+.temp-ring .msr{font-size:18px;align-self:center}
+.temp-ring b{font-family:'Roboto Mono',monospace;font-size:22px;font-weight:700}
+.temp-ring i{font-style:normal;font-size:11px;opacity:.7}
+.temp-ring.ok{color:var(--ok)}.temp-ring.warn{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.temp-ring.err{background:var(--error-container);color:var(--on-error-container)}
+.uptime{font-size:11.5px;color:var(--on-surface-variant);margin:8px 0 12px;font-family:'Roboto Mono',monospace}
+.gauges{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.g-top{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:600;color:var(--on-surface-variant)}
+.g-top .msr{font-size:15px;margin-right:3px;color:var(--primary)}
+.g-val{font-family:'Roboto Mono',monospace;font-size:13px;font-weight:700;color:var(--on-surface)}
+.g-track{height:8px;border-radius:4px;background:var(--sc-highest);margin:6px 0 4px;overflow:hidden}
+.g-bar{height:100%;border-radius:4px;background:var(--primary);width:0;transition:width .45s cubic-bezier(.2,0,0,1),background .3s}
+.g-bar.warn{background:var(--tertiary)}.g-bar.err{background:var(--error)}
+.g-sub{font-size:10px;color:var(--on-surface-variant);font-family:'Roboto Mono',monospace}
+.perf-row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.perf-lb{font-size:11.5px;font-weight:600;color:var(--on-surface-variant);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.perf-lb .msr{font-size:16px;color:var(--primary)}
+
+.alerts{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.alerts:empty{display:none}
+.achip{display:inline-flex;align-items:center;gap:5px;border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600}
+.achip .msr{font-size:15px}
+.achip.err{background:var(--error-container);color:var(--on-error-container)}
+.achip.warn{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.achip.info{background:var(--secondary-container);color:var(--on-secondary-container)}
+.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.qbtn{border-radius:12px;background:var(--secondary-container);color:var(--on-secondary-container);
+  padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;transition:transform .1s}
+.qbtn:active{transform:scale(.96)}
+.qbtn .msr{font-size:20px}
+.qbtn em{font-style:normal;font-family:'Roboto Mono',monospace;font-size:10px;opacity:.75}
+
+.frow{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.frow span{color:var(--on-surface-variant)}
+.frow b{font-family:'Roboto Mono',monospace;font-weight:700}
+.frow.sub b{font-size:11px;font-weight:500;color:var(--on-surface-variant)}
+.frow.total{border-top:1px solid var(--outline-variant);margin-top:6px;padding-top:8px}
+.pos{color:var(--ok)!important}.neg{color:var(--error)!important}
+.live-card{background:var(--term-bg)!important;color:var(--term-fg);border:0}
+.live-card .card-title{color:#7d9291}.live-card .card-title .msr{color:#57b8bd}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#57d99a;animation:pulse 1.6s infinite}
+
+.log-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.fchip{height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--outline);font-size:12px;font-weight:600;
+  color:var(--on-surface-variant);display:inline-flex;align-items:center;transition:background .15s}
+.fchip.on{background:var(--secondary-container);color:var(--on-secondary-container);border-color:transparent}
+.fchip.on::before{content:'check';font-family:'Material Symbols Rounded';font-size:14px;margin-right:4px;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 20}
+.term{flex:1;min-height:300px;height:calc(100dvh - 330px);overflow-y:auto;background:var(--term-bg);color:var(--term-fg);
+  border-radius:12px;padding:12px;font-family:'Roboto Mono',monospace;font-size:11px;line-height:1.75;box-shadow:var(--sh1)}
+.tl{white-space:pre-wrap;word-break:break-all}
+.tl.new{animation:tlIn .25s both}
+@keyframes tlIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+.lt{color:#54696a}.ll{font-weight:700}
+.l-info{color:#9fb4b3}.l-ok{color:#7fd9a6}.l-warn{color:#e8c46b}.l-err{color:#ff8a80}
+
+.c-head{display:flex;align-items:center;gap:10px}
+.c-ic{font-size:26px;color:var(--primary);background:var(--primary-container);border-radius:10px;padding:6px}
+.c-name{flex:1;min-width:0}
+.c-name b{font-size:14.5px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-type{font-size:11px;color:var(--on-surface-variant)}
+.wt{color:var(--warn);font-style:normal;font-weight:600}
+.vipchip{font-size:10px;font-weight:800;background:var(--tertiary-container);color:var(--on-tertiary-container);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:1px}
+.refchip{font-size:10px;font-weight:800;background:var(--secondary-container);color:var(--on-secondary-container);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:1px}
+.tr-good{font-size:10px;font-weight:800;color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,transparent);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:1px}
+.tr-picky{font-size:10px;font-weight:800;color:var(--warn);background:color-mix(in srgb,var(--warn) 13%,transparent);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:1px}
+.tr-lazy{font-size:10px;font-weight:800;color:var(--error);background:var(--error-container);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:1px}
+.exp{font-size:11px;color:var(--on-surface-variant);font-family:'Roboto Mono',monospace}
+.dot{width:11px;height:11px;border-radius:50%;flex:none}
+.dot.ok{background:var(--ok);animation:pulse 2s infinite}
+.dot.warn{background:var(--warn);animation:pulse 1.2s infinite}
+.dot.err{background:var(--error);animation:pulse .9s infinite}
+.rchips{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 2px}
+.rchip{font-size:10.5px;font-family:'Roboto Mono',monospace;background:var(--sc-high);border-radius:6px;padding:3px 7px;color:var(--on-surface-variant);font-weight:500}
+.rchip.cr-0{color:var(--ok);font-weight:700}
+.rchip.cr-2{color:var(--warn);font-weight:700}
+.rchip.cr-3{color:var(--error);font-weight:700}
+.fit-warn{font-size:11px;color:var(--on-error-container);background:var(--error-container);border-radius:6px;padding:4px 8px;margin-top:6px;font-weight:600}
+.app-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.pay{font-family:'Roboto Mono',monospace;font-size:18px;font-weight:700;color:var(--on-surface)}
+.pay i{font-style:normal;font-size:11px;color:var(--on-surface-variant);font-weight:500}
+.sp{display:flex;gap:4px}
+.c-meta{display:flex;align-items:center;gap:10px;margin:10px 0 6px;font-size:11.5px;flex-wrap:wrap}
+.c-meta .pay{font-size:15px}
+.st-ok{color:var(--ok);font-weight:600}.st-warn{color:var(--warn);font-weight:600}.st-err{color:var(--error);font-weight:600}
+.sat-t{margin-left:auto;color:var(--on-surface-variant);font-family:'Roboto Mono',monospace}
+.sat{height:6px;border-radius:3px;background:var(--sc-highest);overflow:hidden}
+.sat-bar{height:100%;border-radius:3px;background:var(--ok);transition:width .5s}
+.sat-bar.mid{background:var(--tertiary)}.sat-bar.low{background:var(--error)}
+.c-acts{display:flex;gap:2px;margin-top:8px;margin-left:-8px;flex-wrap:wrap}
+.empty{padding:26px 16px;text-align:center;color:var(--on-surface-variant);font-size:12.5px;
+  border:1.5px dashed var(--outline-variant);border-radius:12px;line-height:1.8}
+.empty.sm{padding:16px}
+
+.tbtn{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 20px;border-radius:20px;
+  font-size:13.5px;font-weight:600;letter-spacing:.2px;transition:transform .1s,box-shadow .15s}
+.tbtn:active{transform:scale(.96)}
+.tbtn.sm{height:32px;padding:0 14px;font-size:12px;border-radius:16px}
+.tbtn.filled{background:var(--primary);color:var(--on-primary);box-shadow:var(--sh1)}
+.tbtn.tonal{background:var(--secondary-container);color:var(--on-secondary-container)}
+.tbtn.outlined{border:1px solid var(--outline);color:var(--primary)}
+.tbtn.text{color:var(--primary);padding:0 12px}
+.tbtn.danger{color:var(--error)}
+.tbtn .msr.bt{font-size:17px;margin-right:4px}
+
+.hw-h{display:flex;align-items:center;gap:10px}
+.hw-ic{font-size:24px;color:var(--primary)}
+.hw-t{flex:1;min-width:0}
+.hw-t b{font-size:14px;font-weight:700;display:block}
+.hw-t span{font-size:11px;color:var(--on-surface-variant);font-family:'Roboto Mono',monospace}
+.maxchip{font-size:10.5px;font-weight:700;color:var(--on-primary-container);background:var(--primary-container);border-radius:8px;padding:4px 9px}
+.hb{margin-top:10px}
+.hb-t{display:flex;justify-content:space-between;font-size:11px;color:var(--on-surface-variant);font-weight:600}
+.hb-t b{font-family:'Roboto Mono',monospace}.hb-t b.warn{color:var(--warn)}.hb-t b.err{color:var(--error)}
+.hb-track{height:6px;border-radius:3px;background:var(--sc-highest);overflow:hidden;margin-top:4px}
+.hb-bar{height:100%;border-radius:3px;background:var(--ok);transition:width .5s}
+.hb-bar.warn{background:var(--tertiary)}.hb-bar.err{background:var(--error)}
+.hw-info{font-size:11.5px;color:var(--on-surface-variant);margin-top:9px;line-height:1.7}
+.hw-info b{color:var(--on-surface);font-family:'Roboto Mono',monospace}
+.card.repair{background:var(--error-container);color:var(--on-error-container)}
+.card.work{background:var(--primary-container);color:var(--on-primary-container)}
+.rp-h{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:6px}
+.rp-b{font-size:12px;line-height:1.7;margin-bottom:10px;opacity:.92}
+.addon{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--outline-variant);font-size:12.5px;font-weight:600}
+.addon:first-child{border-top:0}
+.addon i{display:block;font-style:normal;font-size:10.5px;color:var(--on-surface-variant);font-weight:400;margin-top:1px}
+.onchip{font-size:10.5px;font-weight:700;color:var(--on-primary-container);background:var(--primary-container);border-radius:8px;padding:4px 9px}
+
+.mail-head{display:flex;justify-content:space-between;align-items:center}
+.mail-unread{font-size:11.5px;color:var(--primary);font-weight:700;margin-left:8px}
+.mail{display:flex;gap:11px;align-items:flex-start;background:var(--surface);border:1px solid var(--outline-variant);border-radius:12px;padding:12px 14px;margin-bottom:8px;transition:background .15s}
+.mail:active{background:var(--sc-high)}
+.mail.unread{background:var(--sc-low);border-color:var(--outline)}
+.m-av{width:38px;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex:none}
+.m-av.sys{background:var(--primary-container);color:var(--on-primary-container)}
+.m-av.client{background:var(--secondary-container);color:var(--on-secondary-container)}
+.m-av.promo{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.m-av.sec{background:var(--error-container);color:var(--on-error-container)}
+.m-main{flex:1;min-width:0}
+.m-top{display:flex;justify-content:space-between;font-size:12px;color:var(--on-surface-variant);gap:8px}
+.m-top b{color:var(--on-surface);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mail.unread .m-top b{font-weight:800}
+.m-time{font-family:'Roboto Mono',monospace;font-size:10.5px;white-space:nowrap}
+.m-sub{font-size:13.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mail.unread .m-sub{font-weight:800}
+.m-snip{font-size:11.5px;color:var(--on-surface-variant);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-tag{font-size:10px;font-weight:700;background:var(--tertiary-container);color:var(--on-tertiary-container);border-radius:6px;padding:2px 6px;flex:none;align-self:center}
+.md-meta{display:flex;gap:10px;align-items:center;padding:6px 0 12px;border-bottom:1px solid var(--outline-variant);margin-bottom:12px}
+.md-body{font-size:13px;line-height:1.9;color:var(--on-surface-variant)}
+.md-body b{color:var(--on-surface)}
+.md-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;align-items:center}
+.md-acts .onchip{margin-left:auto}
+
+#navbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:var(--appw);z-index:40;
+  background:var(--sc);display:flex;padding-bottom:env(safe-area-inset-bottom);border-top:1px solid var(--outline-variant)}
+.nav-it{flex:1;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--on-surface-variant)}
+.ic-wrap{position:relative;width:58px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.nav-it.on .ic-wrap{background:var(--secondary-container)}
+.nav-it .ic{font-size:22px;transition:color .2s}
+.nav-it.on .ic{color:var(--on-secondary-container);font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+.nav-lb{font-size:10.5px;font-weight:500;transition:font-weight .1s}
+.nav-it.on .nav-lb{font-weight:800;color:var(--on-surface)}
+
+#fab{position:fixed;right:calc(50% - var(--appw)/2 + 16px);bottom:calc(94px + env(safe-area-inset-bottom));z-index:39;
+  height:54px;padding:0 20px;border-radius:16px;background:var(--primary-container);color:var(--on-primary-container);
+  display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;box-shadow:var(--sh3);transition:transform .12s}
+#fab:active{transform:scale(.95)}
+#fab .msr{font-size:22px}
+@media(max-width:480px){#fab{right:16px}}
+
+#scrim{position:fixed;inset:0;z-index:105;background:var(--scrim);opacity:0;transition:opacity .25s}
+#scrim.on{opacity:1}
+#sheet{position:fixed;bottom:0;left:50%;transform:translate(-50%,105%);width:var(--appw);max-height:84dvh;z-index:110;
+  background:var(--sc-low);border-radius:28px 28px 0 0;display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.2,0,0,1);box-shadow:var(--sh3)}
+#sheet.on{transform:translate(-50%,0)}
+.sh-handle{width:32px;height:4px;border-radius:2px;background:var(--surface-variant);margin:12px auto 4px;flex:none}
+.sh-head{display:flex;align-items:center;padding:6px 12px 10px 22px;flex:none}
+.sh-head b{font-size:18px;font-weight:800;flex:1;line-height:1.4}
+#sheet-body{overflow-y:auto;padding:0 16px calc(20px + env(safe-area-inset-bottom))}
+.sh-sec{margin-bottom:6px}
+.sh-h{font-size:12px;font-weight:800;letter-spacing:1px;color:var(--primary);margin:14px 2px 8px}
+.sh-item{background:var(--surface);border:1px solid var(--outline-variant);border-radius:12px;padding:12px 14px}
+.sh-cur{font-size:11.5px;color:var(--on-surface-variant);display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.sh-cur .msr{font-size:15px;color:var(--ok)}
+.sh-next{display:flex;align-items:center;gap:10px}
+.sh-next b{font-size:13.5px;display:block}
+.sh-next span{font-size:11px;color:var(--on-surface-variant);font-family:'Roboto Mono',monospace}
+.sh-next s{opacity:.5;font-size:11px;margin-right:4px}
+.sh-next>div{flex:1}
+.sh-max{font-size:12px;color:var(--on-surface-variant);padding:2px 0}
+.sh-svc{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--outline-variant);border-radius:12px;padding:11px 14px;margin-bottom:8px}
+.sh-svc>div{flex:1}
+.sh-svc b{font-size:13px;display:block}
+.sh-svc span{font-size:10.5px;color:var(--on-surface-variant)}
+.sale-banner{display:flex;align-items:center;gap:6px;background:var(--tertiary-container);color:var(--on-tertiary-container);
+  border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;margin-top:10px}
+.sale-banner .msr{font-size:17px}
+.sale-banner.coupon{background:var(--primary-container);color:var(--on-primary-container)}
+
+.dlg-wrap{position:fixed;inset:0;z-index:70}
+.dlg-wrap .scrim2{position:absolute;inset:0;background:var(--scrim);animation:fadeIn .2s both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.dlg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(330px,calc(100vw - 44px));
+  background:var(--sc-high);border-radius:28px;padding:22px 24px 18px;animation:dlgIn .22s cubic-bezier(.2,0,0,1) both;box-shadow:var(--sh3)}
+@keyframes dlgIn{from{opacity:0;transform:translate(-50%,-50%) scale(.86)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.dlg-wrap.out .dlg{animation:dlgOut .15s both}
+.dlg-wrap.out .scrim2{animation:fadeOut .15s both}
+@keyframes dlgOut{to{opacity:0;transform:translate(-50%,-50%) scale(.92)}}
+@keyframes fadeOut{to{opacity:0}}
+.dlg-ic{font-size:26px;color:var(--primary);margin-bottom:12px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+.dlg-title{font-size:21px;font-weight:800;margin-bottom:10px;line-height:1.35}
+.dlg-body{font-size:13px;line-height:1.85;color:var(--on-surface-variant)}
+.dlg-body b{color:var(--on-surface)}
+.dlg-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:18px;flex-wrap:wrap}
+.bill{margin-top:4px}
+.brow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:12.5px;border-bottom:1px dashed var(--outline-variant)}
+.brow span{color:var(--on-surface-variant)}
+.brow b{font-family:'Roboto Mono',monospace;font-size:12.5px}
+.brow.total{border-bottom:0;border-top:2px solid var(--outline);margin-top:4px;padding-top:9px;font-weight:800}
+.brow.total span{color:var(--on-surface);font-weight:800}
+.brow.total b{font-size:16px}
+.set-row{font-size:12.5px;line-height:1.8}
+
+#reg{position:fixed;inset:0;z-index:100;overflow-y:auto;
+  background-color:var(--surface);
+  background-image:
+    radial-gradient(640px 440px at 108% -6%, color-mix(in srgb,var(--primary) 11%,transparent),transparent 70%),
+    radial-gradient(540px 420px at -16% 30%, color-mix(in srgb,var(--tertiary) 9%,transparent),transparent 70%),
+    linear-gradient(color-mix(in srgb,var(--outline-variant) 45%,transparent) 1px,transparent 1px),
+    linear-gradient(90deg,color-mix(in srgb,var(--outline-variant) 45%,transparent) 1px,transparent 1px);
+  background-size:auto,auto,30px 30px,30px 30px;
+  transition:opacity .3s,transform .3s}
+#reg.bye{opacity:0;transform:translateY(-14px)}
+.reg-inner{width:min(400px,100%);margin:0 auto;padding:26px 22px calc(44px + env(safe-area-inset-bottom))}
+.reg-term{background:var(--term-bg);color:#8fd6b0;border-radius:12px;padding:14px 16px;font-size:12px;line-height:1.9;margin-bottom:22px;box-shadow:var(--sh1)}
+.t-p{color:#57b8bd}.t-dim{color:#5f7372}
+.cursor{animation:blink 1.1s steps(1) infinite;color:#8fd6b0}
+@keyframes blink{50%{opacity:0}}
+.reg-h{font-size:26px;font-weight:900;margin-bottom:4px}
+.reg-sub{font-size:12.5px;color:var(--on-surface-variant);margin-bottom:18px;line-height:1.7}
+.f-lb{display:block;font-size:12px;font-weight:700;color:var(--on-surface-variant);margin:14px 2px 6px}
+.f-row{display:flex;gap:8px}
+.f-in{flex:1;min-width:0;height:50px;border:1.5px solid var(--outline);border-radius:8px;background:transparent;color:var(--on-surface);padding:0 14px;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+.f-in:focus{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+#reg-code{font-family:'Roboto Mono',monospace;letter-spacing:6px}
+.f-sel{height:50px;border:1.5px solid var(--outline);border-radius:8px;background:var(--surface);color:var(--on-surface);padding:0 10px;font-size:14px;outline:none}
+.f-err{font-size:11.5px;color:var(--error);margin:5px 2px 0}
+.f-agree{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--on-surface-variant);margin:18px 2px}
+.f-agree input{width:18px;height:18px;accent-color:var(--primary);flex:none}
+.reg-btn{width:100%;height:52px;font-size:15px;margin-top:6px}
+
+#snack-root{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(158px + env(safe-area-inset-bottom));z-index:120;width:var(--appw);
+  display:flex;justify-content:center;pointer-events:none;padding:0 16px}
+.snack{background:var(--inverse-surface);color:var(--inverse-on-surface);border-radius:6px;padding:11px 16px;
+  font-size:12.5px;font-weight:500;box-shadow:var(--sh3);max-width:344px;animation:snackIn .28s cubic-bezier(.2,0,0,1) both}
+.snack.err{background:var(--error-container);color:var(--on-error-container)}
+.snack.ok{background:var(--primary-container);color:var(--on-primary-container)}
+@keyframes snackIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="tb-row1">
+      <span class="msr tb-logo f">dns</span>
+      <div class="tb-title">
+        <div class="tb-name">运营你的服务器模拟器</div>
+        <div class="tb-sub">SERVER OPS SIMULATOR · <b id="tb-lv">Lv.1 · 家庭机房</b></div>
+      </div>
+      <button class="icon-btn ripple" data-act="theme" aria-label="主题"><span class="msr" id="theme-ic">dark_mode</span></button>
+      <button class="icon-btn ripple" data-act="settings" aria-label="系统"><span class="msr">settings</span></button>
+    </div>
+    <div class="tb-row2">
+      <span class="money" id="money">¥8,000</span>
+      <div class="mini-chips">
+        <span class="mini-chip"><span class="msr f" style="color:var(--tertiary)">star</span>口碑 <b id="rep-v">50</b></span>
+        <span class="mini-chip"><span class="msr">calendar_today</span><span class="mono" id="date-v">07-27 08:00</span></span>
+        <span class="mini-chip"><span class="msr">alternate_email</span><span class="em" id="tb-mail">未注册</span></span>
+      </div>
+    </div>
+    <div class="tb-row3">
+      <div class="seg" id="speed-seg">
+        <button data-speed="0" class="ripple" aria-label="暂停"><span class="msr">pause</span></button>
+        <button data-speed="1" class="ripple">1×</button>
+        <button data-speed="2" class="ripple">2×</button>
+        <button data-speed="4" class="ripple">4×</button>
+        <button data-speed="8" class="ripple">8×</button>
+      </div>
+      <span class="day-count" id="day-v">第 1 天</span>
+    </div>
+  </header>
+
+  <main id="pages">
+    <section class="page on" id="page-dash">
+      <div class="card elevated" id="nostart" hidden>
+        <div class="card-title"><span class="msr">shopping_bag</span>服务器尚未上架</div>
+        <div style="font-size:12.5px;color:var(--on-surface-variant);line-height:1.8;margin-bottom:10px">支付首期费用 <b class="mono">¥1,400</b>（装机 + 首月机位 + IP），服务器即刻上架，客户马上就来。</div>
+        <button class="tbtn filled ripple" data-act="buy-server">立即开通 ¥1,400</button>
+      </div>
+      <div class="card elevated">
+        <div class="status-head">
+          <div>
+            <div class="label">机柜 A-12 · 1U 机架服务器</div>
+            <div class="status-name ok" id="srv-status" data-c="ok">运行中</div>
+          </div>
+          <div class="temp-ring ok" id="temp-box" data-c="ok"><span class="msr">device_thermostat</span><b id="temp-v">31</b><i>°C</i></div>
+        </div>
+        <div class="uptime" id="uptime-v">已运行 0 天 0 小时 · SLA 100.00%</div>
+        <div class="gauges">
+          <div><div class="g-top"><span><span class="msr">memory_alt</span>CPU</span><b class="g-val" id="g-cpu-v">0%</b></div>
+            <div class="g-track"><div class="g-bar" id="g-cpu-b"></div></div><div class="g-sub" id="g-cpu-s">0 / 408 算力</div></div>
+          <div><div class="g-top"><span><span class="msr">memory</span>内存</span><b class="g-val" id="g-ram-v">0%</b></div>
+            <div class="g-track"><div class="g-bar" id="g-ram-b"></div></div><div class="g-sub" id="g-ram-s">0 / 16 GB</div></div>
+          <div><div class="g-top"><span><span class="msr">lan</span>带宽</span><b class="g-val" id="g-bw-v">0%</b></div>
+            <div class="g-track"><div class="g-bar" id="g-bw-b"></div></div><div class="g-sub" id="g-bw-s">0 / 10 Mbps</div></div>
+          <div><div class="g-top"><span><span class="msr">hard_drive</span>磁盘</span><b class="g-val" id="g-disk-v">0%</b></div>
+            <div class="g-track"><div class="g-bar" id="g-disk-b"></div></div><div class="g-sub" id="g-disk-s">22 / 512 GB</div></div>
+        </div>
+        <div class="perf-row">
+          <span class="perf-lb"><span class="msr">tune</span>性能模式</span>
+          <div class="seg seg-sm" id="perf-seg">
+            <button data-perf="0" class="ripple">节能</button>
+            <button data-perf="1" class="on ripple">标准</button>
+            <button data-perf="2" class="ripple">性能</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="alerts" id="alerts"></div>
+
+      <div class="quick">
+        <button class="qbtn ripple" data-act="restart-srv"><span class="msr">restart_alt</span>重启服务器</button>
+        <button class="qbtn ripple" data-act="clean-log"><span class="msr">delete_sweep</span>清理日志<em id="logsize-v">1.5G</em></button>
+        <button class="qbtn ripple" data-act="backup"><span class="msr">backup</span>快照备份<em>¥50 / 次</em></button>
+        <button class="qbtn ripple" data-act="burst"><span class="msr">speed</span>突发带宽<em>¥300 / 24h ×2</em></button>
+      </div>
+
+      <div class="card outlined">
+        <div class="card-title"><span class="msr">payments</span>本期财务<em id="fin-days">距结算 30 天</em></div>
+        <div class="frow"><span>预估托管收入</span><b class="pos" id="fin-in">+¥0</b></div>
+        <div class="frow"><span id="fin-out-l">预估支出（含租金 ¥800）</span><b class="neg" id="fin-out">-¥0</b></div>
+        <div class="frow sub"><span>电费（峰谷计价）/ 带宽月租</span><b id="fin-elec">¥0 · ¥0</b></div>
+        <div class="frow total"><span>预估净额</span><b id="fin-net">+¥0</b></div>
+      </div>
+
+      <div class="card filled live-card">
+        <div class="card-title"><span class="msr">terminal</span>实时日志<span class="live-dot"></span></div>
+        <div id="live-log"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-mails">
+      <div class="mail-head">
+        <div><b style="font-size:18px;font-weight:900">收件箱</b><span class="mail-unread" id="mail-unread"></span></div>
+        <button class="tbtn text ripple sm" data-act="mail-readall">全部已读</button>
+      </div>
+      <div class="log-toolbar" style="margin-top:10px">
+        <button class="fchip on ripple" data-act="mail-filter" data-f="all">全部</button>
+        <button class="fchip ripple" data-act="mail-filter" data-f="unread">未读</button>
+        <button class="fchip ripple" data-act="mail-filter" data-f="sys">系统</button>
+        <button class="fchip ripple" data-act="mail-filter" data-f="client">客户</button>
+        <button class="fchip ripple" data-act="mail-filter" data-f="promo">推广</button>
+      </div>
+      <div id="mails"></div>
+      <div class="empty" id="mails-empty">收件箱是空的<br>注册、账单、告警、客户工单都会发到这里</div>
+    </section>
+
+    <section class="page" id="page-clients">
+      <div class="sec-title">业务申请<em id="apps-count"></em></div>
+      <div id="apps"></div>
+      <div class="sec-title">已签约客户<em id="client-count"></em></div>
+      <div id="clients"></div>
+      <div class="empty" id="clients-empty">还没有客户。<br>签下第一单，口碑会慢慢带来新客户。</div>
+    </section>
+
+    <section class="page" id="page-hw"><div id="hw-list"></div></section>
+
+    <section class="page" id="page-logs">
+      <div class="log-toolbar">
+        <button class="fchip on ripple" data-act="log-filter" data-f="all">全部</button>
+        <button class="fchip ripple" data-act="log-filter" data-f="warn">告警</button>
+        <button class="fchip ripple" data-act="log-filter" data-f="err">错误</button>
+        <span style="flex:1"></span>
+        <button class="icon-btn ripple" data-act="log-clear" aria-label="清空"><span class="msr">delete</span></button>
+      </div>
+      <div class="term" id="term"></div>
+    </section>
+  </main>
+
+  <button id="fab" class="ripple" data-act="shop"><span class="msr f">storefront</span>采购设备</button>
+
+  <nav id="navbar">
+    <button class="nav-it on ripple" data-page="dash"><span class="ic-wrap"><span class="msr ic">space_dashboard</span></span><span class="nav-lb">概览</span></button>
+    <button class="nav-it ripple" data-page="mails"><span class="ic-wrap"><span class="msr ic">mail</span></span><span class="nav-lb">邮箱</span></button>
+    <button class="nav-it ripple" data-page="clients"><span class="ic-wrap"><span class="msr ic">group</span></span><span class="nav-lb">客户</span></button>
+    <button class="nav-it ripple" data-page="hw"><span class="ic-wrap"><span class="msr ic">dns</span></span><span class="nav-lb">硬件</span></button>
+    <button class="nav-it ripple" data-page="logs"><span class="ic-wrap"><span class="msr ic">terminal</span></span><span class="nav-lb">日志</span></button>
+  </nav>
+</div>
+
+<div id="reg" hidden>
+  <div class="reg-inner">
+    <div class="reg-term mono">
+      <div><span class="t-p">$</span> serverops --new-account</div>
+      <div class="t-dim">正在连接 IDC 管理面板…<span class="cursor">▌</span></div>
+    </div>
+    <h1 class="reg-h">创建运维账号</h1>
+    <p class="reg-sub">注册工作邮箱，用于接收账单、告警、工单与客户来信<br>注册完成后即可开通你的第一台服务器</p>
+    <label class="f-lb">邮箱地址</label>
+    <div class="f-row">
+      <input id="reg-pre" class="f-in" placeholder="yourname" autocomplete="off">
+      <select id="reg-dom" class="f-sel">
+        <option>@qq.com</option><option>@163.com</option><option>@126.com</option>
+        <option>@gmail.com</option><option>@outlook.com</option><option>@foxmail.com</option><option>@sina.com</option>
+      </select>
+    </div>
+    <div class="f-err" id="err-mail" hidden>请输入 3-18 位字母、数字或 . _ -</div>
+    <label class="f-lb">登录密码</label>
+    <div class="f-row">
+      <input id="reg-pw" type="password" class="f-in" placeholder="至少 6 位">
+      <button class="icon-btn ripple" data-act="pw-eye" type="button" aria-label="显示密码"><span class="msr" id="pw-ic">visibility</span></button>
+    </div>
+    <div class="f-err" id="err-pw" hidden>密码至少 6 位</div>
+    <label class="f-lb">邮箱验证码</label>
+    <div class="f-row">
+      <input id="reg-code" class="f-in" inputmode="numeric" maxlength="6" placeholder="······">
+      <button class="tbtn outlined ripple" id="send-code" data-act="send-code" type="button" style="flex:none">发送验证码</button>
+    </div>
+    <div class="f-err" id="err-code" hidden></div>
+    <button class="tbtn text ripple" data-act="reg-inbox" type="button"><span class="msr bt">mail</span>打开收件箱查看验证码</button>
+    <label class="f-agree"><input type="checkbox" id="reg-agree">我已阅读并同意《服务协议》与《隐私政策》</label>
+    <button class="tbtn filled ripple reg-btn" data-act="reg-submit" type="button">注册并进入机房</button>
+  </div>
+</div>
+
+<div id="scrim" hidden></div>
+<div id="sheet" hidden>
+  <div class="sh-handle"></div>
+  <div class="sh-head"><b id="sheet-title">设备采购</b><button class="icon-btn ripple" data-act="sheet-close"><span class="msr">close</span></button></div>
+  <div id="sheet-body"></div>
+</div>
+<div id="dialog-root"></div>
+<div id="snack-root"></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ri=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const fmt=n=>Math.round(n).toLocaleString('zh-CN');
+const fmt1=n=>(Math.round(n*10)/10).toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1});
+const pad=n=>String(n).padStart(2,'0');
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
+const KEY='serverops-save-v1', START=Date.parse('2026-07-27T08:00:00'), TICK_MIN=10;
+
+const TYPES={
+  blog:{n:'个人博客',ic:'article',cpu:12,ram:.5,disk:2,bw:.3,pay:60,beian:1,grp:'c'},
+  forum:{n:'交流论坛',ic:'forum',cpu:30,ram:2,disk:15,bw:2,pay:150,beian:1,grp:'c'},
+  corp:{n:'企业官网',ic:'business',cpu:35,ram:2,disk:10,bw:1.5,pay:320,beian:1,grp:'b'},
+  api:{n:'API 后端',ic:'api',cpu:45,ram:2,disk:8,bw:1,pay:280,beian:0,grp:'b'},
+  db:{n:'数据库托管',ic:'database',cpu:55,ram:6,disk:50,bw:.5,pay:450,beian:0,grp:'b'},
+  eshop:{n:'电商平台',ic:'shopping_cart',cpu:70,ram:4,disk:40,bw:4,pay:650,beian:1,grp:'c'},
+  game:{n:'游戏服务器',ic:'sports_esports',cpu:110,ram:8,disk:60,bw:6,pay:880,beian:0,grp:'c'},
+  video:{n:'视频点播站',ic:'ondemand_video',cpu:90,ram:4,disk:120,bw:12,pay:1200,beian:1,grp:'c'},
+};
+const SVC={blog:'nginx',forum:'php-fpm',corp:'nginx',api:'node-api',db:'mysqld',eshop:'tomcat',game:'mc_server',video:'ffmpeg-stream'};
+const NAMES={
+  blog:['夜雨随笔','代码与猫','山间摄影集','老张的钓鱼日记','独立开发笔记','胶片冲扫小站'],
+  forum:['骑行者之家','考研互助社区','铲屎官联盟','键盘侠茶馆','模型玩家论坛','路亚钓鱼圈'],
+  corp:['星辰科技官网','蓝海贸易门户','绿洲农业集团','极光设计工作室','恒信会计事务所','云帆律所'],
+  api:['智慧物流调度 API','在线支付网关','天气数据接口','短链跳转服务','物联网上报平台','短信回执接口'],
+  db:['电商订单 MySQL','用户中心数据库','日志分析 ClickHouse','Redis 缓存集群','时序监控库'],
+  eshop:['鲜果优选商城','潮鞋严选','母婴特卖汇','数码海淘城','山货直营店'],
+  game:['像素生存 MC 服','仙侠页游专区','CS 社区混战服','联机种田小镇','塔科夫 like 私服'],
+  video:['短剧高清点播','公开课视频站','演唱会直播回放','美食教学视频','航拍素材站'],
+};
+const TIERS={
+  cpu:[{m:'至强 E-2224G',c:4,f:3.4,p:0},{m:'至强 E-2388G',c:8,f:3.2,p:2600},{m:'至强 Silver 4314',c:16,f:2.4,p:6200},{m:'至强 Gold 6326 ×2',c:32,f:2.9,p:14800},{m:'EPYC 9354 ×2',c:64,f:3.25,p:36000}],
+  ram:[{m:'16GB DDR4 ECC',g:16,p:0},{m:'32GB DDR4 ECC',g:32,p:650},{m:'64GB DDR4 ECC',g:64,p:1450},{m:'128GB DDR4 ECC',g:128,p:3200},{m:'256GB DDR5 ECC',g:256,p:7200}],
+  disk:[{m:'512GB SATA SSD',g:512,p:0},{m:'1TB NVMe SSD',g:1024,p:520},{m:'2TB NVMe SSD',g:2048,p:1150},{m:'4TB NVMe Gen4',g:4096,p:2500},{m:'8TB NVMe 企业级',g:8192,p:5600}],
+  bw:[{m:'10Mbps 独享 BGP',v:10,p:0},{m:'30Mbps 独享 BGP',v:30,p:400},{m:'100Mbps 独享 BGP',v:100,p:980},{m:'300Mbps 独享 BGP',v:300,p:2300},{m:'1Gbps 独享 BGP',v:1000,p:5200}],
+  psu:[{m:'450W 单电源',w:450,p:0},{m:'650W 80Plus 金牌',w:650,p:520},{m:'1000W 冗余 1+1',w:1000,p:1350}],
+  cool:[{m:'标准风冷',off:6,p:0},{m:'增强风冷 · 双风扇墙',off:14,p:900},{m:'一体式液冷',off:26,p:3600}],
+};
+const SVCS={
+  ups:{n:'UPS 不间断电源',d:'市电波动时电池无缝接管，避免异常重启',p:1800},
+  ddos:{n:'高防 IP 接入',d:'自动清洗 DDoS 攻击流量 · 月付 ¥600',p:600,mfee:600},
+  autoR:{n:'进程守护脚本',d:'客户进程崩溃后自动拉起（约 3 分钟）',p:300},
+  rotate:{n:'日志自动轮转',d:'logrotate 每日压缩，日志增长 -65%',p:250},
+  snap:{n:'自动快照备份',d:'每日异地快照，事故损失大幅降低 · 月付 ¥100',p:500,mfee:100},
+  ops:{n:'驻场运维工程师',d:'自动处理工单 · 维修提速 50% · 硬件损耗 -40% · 月薪 ¥1200',p:300,mfee:1200},
+  ads:{n:'投放获客广告',d:'未来 3 天客户申请显著增多',p:500,repeat:1},
+};
+const LEVELS=[[0,'家庭机房'],[5000,'个人站长'],[15000,'小型工作室'],[40000,'IDC 新秀'],[100000,'专业机房'],[250000,'区域服务商'],[600000,'骨干网玩家'],[1500000,'顶级 IDC'],[4000000,'云服务巨头']];
+const PN={cpu:'CPU',ram:'内存条',disk:'硬盘'};
+const FEST={'09-09':'99 划算节','11-11':'双 11 大促','12-12':'双 12 年终盛典','06-18':'618 大促'};
+const SPAMS=[
+  {f:'票务代理-王经理',s:'企业代开发票，正规可查',b:'各类增值税普票、专票，税率优惠，当天出票，欢迎咨询。<br><br>回复 TD 退订。'},
+  {id:'coupon',f:'云鸽代金券',s:'【限时】硬件采购代金券 ¥500 待领取',b:'机房新用户专享：<b>¥500 无门槛硬件代金券</b>，点击下方按钮领取，下次购买硬件自动抵扣，72 小时内有效。<br><br>回复 TD 退订。'},
+  {f:'惠商小贷',s:'企业经营贷，最快当天放款',b:'无需抵押，额度最高 300 万，年化利率低至 3.6%。<br><br>回复 TD 退订。'},
+  {f:'快排 SEO 老周',s:'网站排名上不去？试试关键词快排',b:'7 天上首页，无效退款，已服务 3000+ 站点。<br><br>回复 TD 退订。'},
+  {f:'华南二手设备回收',s:'高价收购二手服务器 / 承接带宽出租',b:'现金结算，上门回收，整柜打包价更高。<br><br>回复 TD 退订。'},
+];
+const COMPLAINTS=['网站最近有点卡','访问偶尔超时','数据库响应变慢','晚高峰经常打不开','后台上传文件失败'];
+
+function freshState(){return{
+  v:1,money:8000,rep:50,gm:0,speed:1,rent:800,rentHiked:0,
+  user:{email:'',reg:false},started:false,mails:[],mid:1,regCode:null,regCodeAt:0,
+  couponTaken:false,couponUsed:false,
+  hw:{cpu:0,ram:0,disk:0,bw:0,psu:0,cool:0,perf:1,health:{cpu:100,ram:100,disk:100},
+      ups:false,ddos:false,autoR:false,rotate:false,snap:false,ops:false},
+  clients:[],apps:[],nid:1,
+  logsGB:1.5,temp:31,watts:0,kwh:0,elecCost:0,
+  m:{cpuD:0,bwD:0,cpuLoad:0,bwLoad:0,ramU:0,diskUsed:21.5,diskPct:4.2,bwCap:10},
+  repairing:null,pendingUp:null,thermal:false,rebooting:0,
+  ddos:null,vuln:null,vulnRisk:false,viral:null,
+  fiberCut:null,acDown:null,sale:null,fest:null,festDone:{},
+  burst:null,heatwave:null,priceHike:null,maint:null,
+  lastBeian:-99,lastPower:-99,lastGood:-99,lastTicket:-99,lastBadSec:-99,
+  lastPoach:-99,lastRecover:-99,lastInsp:-99,lastUsed:-99,lastSpam:-99,
+  backupAt:-99,marketingUntil:0,nextSettle:30,settled:0,
+  totalIn:0,totalOut:0,totalSigned:0,incidents:0,left:0,
+  upMin:0,downMin:0,lvShown:0,over:false,
+  flags:{c1:false,c5:false,c10:false,ddosWin:false,wcpu:false,wram:false,wdisk:false,sfNoted:false,overMail:false,debt1:false,debt2:false},
+  log:[],dirty:true,
+};}
+let S=freshState(), shownMoney=8000, curPage='dash', logFilter='all', mailFilter='all';
+let alertSig='', liveLogLen=0;
+
+const dayNum=()=>Math.floor(S.gm/1440)+1;
+const hourOf=()=>Math.floor((S.gm%1440)/60);
+function dateStr(){const d=new Date(START+S.gm*60000);return pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());}
+const isSpringFest=()=>{const md=dateStr().slice(0,5);return md>='02-03'&&md<='02-10';};
+const cpuT=()=>TIERS.cpu[S.hw.cpu];
+const perfCapF=()=>[0.85,1,1.15][S.hw.perf];
+const perfPowF=()=>[0.8,1,1.25][S.hw.perf];
+const perfHeat=()=>[-4,0,6][S.hw.perf];
+const cpuCap=()=>cpuT().c*cpuT().f*30*perfCapF()*(S.thermal?.6:1)*(S.hw.health.cpu<40?.75:1);
+const ramCap=()=>TIERS.ram[S.hw.ram].g;
+const diskCap=()=>TIERS.disk[S.hw.disk].g;
+const bwCap=()=>TIERS.bw[S.hw.bw].v;
+const bwCapEff=()=>bwCap()*(S.fiberCut?0.2:1)*(S.burst?2:1);
+const psuW=()=>TIERS.psu[S.hw.psu].w;
+const coolOff=()=>TIERS.cool[S.hw.cool].off;
+const ramUsedNow=()=>S.clients.reduce((s,c)=>s+(c.status==='crashed'?0:c.ram),0);
+const bwUsedNow=()=>S.clients.reduce((s,c)=>s+(c.status==='online'?c.bw:0),0);
+function curve(grp,h,sf){
+  let m;
+  if(grp==='b')m=(h>=9&&h<19)?1.15:(h>=19&&h<22?.9:.55);
+  else m=(h>=19&&h<24)?1.4:(h>=9&&h<19?1:(h<7?.55:.8));
+  if(sf)m*=grp==='b'?0.5:1.25;
+  return m;
+}
+function elecPrice(h){if(h<8)return 0.45;if(h<10)return 0.9;if(h<15)return 1.45;if(h<19)return 0.9;if(h<21)return 1.45;return 0.9;}
+const priceNow=h=>elecPrice(h)*(S.priceHike?1.15:1);
+function monthlyOut(){
+  let svc=0;for(const[k,v]of Object.entries(SVCS))if(v.mfee&&S.hw[k])svc+=v.mfee;
+  return{rent:S.rent,bw:Math.max(0,bwCap()-10)*20,svc};
+}
+function levelInfo(){let lv=0;for(let i=0;i<LEVELS.length;i++)if(S.totalIn>=LEVELS[i][0])lv=i;return{lv,name:LEVELS[lv][1]};}
+function sla(){const t=S.upMin+S.downMin;return t>0?(S.upMin/t*100).toFixed(2):'100.00';}
+const replaceCost=p=>Math.round({cpu:500,ram:300,disk:350}[p]+TIERS[p][S.hw[p]].p*.2);
+const couponOn=()=>S.couponTaken&&!S.couponUsed;
+function tierPrice(cat,idx){
+  let p=TIERS[cat][idx].p;
+  if(S.sale)p=Math.round(p*.7);
+  if(couponOn()&&p>0)p=Math.max(0,p-500);
+  return p;
+}
+
+/* ================= 邮箱 ================= */
+function sendMail(o){
+  S.mails.unshift({id:S.mid++,from:o.from||'system@serverops.cn',fromName:o.fromName,subject:o.subject,
+    body:o.body,cat:o.cat||'sys',act:o.act||null,cid:o.cid||0,acted:false,read:false,time:dateStr()});
+  if(S.mails.length>60)S.mails.length=60;
+  snack(`📧 ${o.fromName}：${o.subject}`);
+  if(curPage==='mails')renderMails();
+}
+function mailsListHtml(){
+  return S.mails.filter(m=>mailFilter==='all'||(mailFilter==='unread'?!m.read:m.cat===mailFilter)).map(m=>`
+    <div class="mail ${m.read?'':'unread'} ripple" data-act="mail-open" data-id="${m.id}">
+      <span class="m-av ${m.cat}">${m.fromName.trim()[0]}</span>
+      <div class="m-main">
+        <div class="m-top"><b>${m.fromName}</b><span class="m-time">${m.time}</span></div>
+        <div class="m-sub">${m.subject}</div>
+        <div class="m-snip">${m.body.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,44)}</div>
+      </div>
+      ${m.cat==='promo'?'<span class="m-tag">推广</span>':''}
+    </div>`).join('');
+}
+function renderMails(){
+  const n=S.mails.filter(m=>!m.read).length;
+  $('#mail-unread').textContent=n?`未读 ${n} 封`:'';
+  $('#mails').innerHTML=mailsListHtml();
+  $('#mails-empty').hidden=S.mails.length>0;
+}
+function openMailSheet(id){
+  const m=S.mails.find(x=>x.id===id);if(!m)return;
+  m.read=true;renderMails();
+  let acts='';
+  if(m.act){
+    if(m.act==='apologize'&&!m.acted)acts=`<button class="tbtn tonal ripple" data-act="mail-reply" data-cid="${m.cid}">回复致歉</button>`;
+    if(m.act==='dun'&&!m.acted)acts=`<button class="tbtn tonal ripple" data-act="mail-dun" data-cid="${m.cid}">发送催款函</button>`;
+    if(m.act==='shop')acts=`<button class="tbtn tonal ripple" data-act="mail-shop"><span class="msr bt">storefront</span>去选购硬件</button>`;
+    if(m.act==='coupon')acts=S.couponTaken?'<span class="onchip">已领取</span>':`<button class="tbtn filled ripple" data-act="mail-coupon" data-id="${m.id}">领取 ¥500 代金券</button>`;
+    if(m.act==='unsub')acts=m.acted?'<span class="onchip">已退订</span>':`<button class="tbtn text ripple" data-act="mail-unsub" data-id="${m.id}">退订</button>`;
+  }
+  openSheetHtml(m.subject,`
+    <div class="md-meta"><span class="m-av ${m.cat}">${m.fromName.trim()[0]}</span>
+      <div><b>${m.fromName}</b><div class="mono" style="font-size:11px;color:var(--on-surface-variant)">${m.from} · ${m.time}</div></div></div>
+    <div class="md-body">${m.body}</div>
+    <div class="md-acts">${acts}<button class="tbtn text ripple danger" data-act="mail-del" data-id="${m.id}">删除</button></div>`);
+}
+function dunClient(cid){
+  const c=S.clients.find(x=>x.id===cid);
+  if(!c||!(c.arrears>0))return snack('对方没有欠款记录');
+  if(Math.random()<.6){
+    S.money+=c.arrears;S.totalIn+=c.arrears;
+    addLog('OK',`催款成功：「${c.name}」补交欠款 ¥${fmt(c.arrears)}`);
+    snack(`追回欠款 ¥${fmt(c.arrears)}`,'ok');c.arrears=0;
+  }else{
+    c.sat=clamp(c.sat-5,0,100);
+    addLog('WARN',`催款函被「${c.name}」无视（已读不回）`);
+    snack('催款无果，对方已读不回','err');
+  }
+  S.dirty=true;renderLists();
+}
+
+/* ================= 注册 & 开通 ================= */
+function showErr(id,txt){const el=$('#'+id);if(txt)el.textContent=txt;el.hidden=false;}
+function hideErr(id){$('#'+id).hidden=true;}
+function sendCode(){
+  const pre=$('#reg-pre').value.trim();
+  if(!/^[a-zA-Z0-9._-]{3,18}$/.test(pre)){showErr('err-mail');return;}
+  hideErr('err-mail');
+  S.user.email=pre+$('#reg-dom').value;
+  S.regCode=String(ri(100000,999999));S.regCodeAt=Date.now();
+  sendMail({from:'no-reply@serverops.cn',fromName:'ServerOps 平台',subject:'【验证码】邮箱注册验证',
+    body:`你的注册验证码是：<b style="font-size:20px;letter-spacing:4px">${S.regCode}</b><br><br>验证码 10 分钟内有效，请勿泄露给他人。<br>如非本人操作，请忽略本邮件。`,cat:'sys'});
+  snack('验证码已发送，请到收件箱查看','ok');
+  let cool=60;
+  const btn=$('#send-code');btn.disabled=true;btn.textContent='60s 后重发';
+  const iv=setInterval(()=>{cool--;
+    if(cool<=0){clearInterval(iv);btn.disabled=false;btn.textContent='重新发送';}
+    else btn.textContent=cool+'s 后重发';},1000);
+}
+function regSubmit(){
+  const pre=$('#reg-pre').value.trim(),pw=$('#reg-pw').value,code=$('#reg-code').value.trim();
+  let ok=true;
+  if(!/^[a-zA-Z0-9._-]{3,18}$/.test(pre)){showErr('err-mail');ok=false;}else hideErr('err-mail');
+  if(pw.length<6){showErr('err-pw');ok=false;}else hideErr('err-pw');
+  if(!S.regCode){showErr('err-code','请先点击「发送验证码」');ok=false;}
+  else if(Date.now()-S.regCodeAt>600000){showErr('err-code','验证码已过期，请重新发送');ok=false;}
+  else if(code!==S.regCode){showErr('err-code','验证码不正确');ok=false;}
+  else hideErr('err-code');
+  if(!$('#reg-agree').checked){snack('请先勾选同意服务协议');ok=false;}
+  if(!ok)return;
+  S.user.reg=true;S.regCode=null;
+  $('#reg').classList.add('bye');
+  setTimeout(()=>{$('#reg').hidden=true;},320);
+  sendMail({from:'kefu@serverops.cn',fromName:'ServerOps 客服小云',subject:'欢迎加入 ServerOps 运营平台',
+    body:`你好，${S.user.email}：<br><br>账号创建成功。接下来请完成服务器开通，即可正式接单营业。<br><br>· 账单、告警、工单都会发到这个邮箱<br>· 遇到故障别慌，先看日志<br>· 这行最值钱的东西是口碑<br><br>—— 客服小云`,cat:'sys'});
+  snack('注册成功，欢迎入驻！','ok');
+  $('#tb-mail').textContent=S.user.email;
+  offerServer();save();
+}
+function offerServer(){
+  openDialog({ic:'shopping_bag',title:'开通你的第一台服务器',
+    html:`<div class="bill">
+      <div class="brow"><span>机架服务器装机调试</span><b>¥500</b></div>
+      <div class="brow"><span>首月机位租金（1U · 机柜 A-12）</span><b>¥800</b></div>
+      <div class="brow"><span>独立 IP 开通</span><b>¥100</b></div>
+      <div class="brow total"><span>合计</span><b>¥1,400</b></div></div>
+      <div style="margin-top:8px;font-size:12px">配置：至强 E-2224G 4核 / 16G ECC / 512G SSD / 10M 独享 BGP<br><br>上架后会有客户来询价；盯紧温度与内存，每 30 天结算一次账单。</div>`,
+    btns:[
+      {t:'支付并上架 ¥1,400',cls:'filled',f:()=>{
+        if(S.money<1400)return snack('余额不足','err');
+        S.money-=1400;S.totalOut+=1400;S.started=true;
+        bootLogs();
+        sendMail({from:'billing@idc-a12.cn',fromName:'IDC-A12 商务中心',subject:'【订单】服务器上架完成 · 机柜 A-12',
+          body:`订单 <b>SO-${ri(100000,999999)}</b> 已生效：<br>· 1U 机位（机柜 A-12）已通电<br>· 至强 E-2224G / 16G ECC / 512G SSD / 10M BGP<br>· 独立 IP 已绑定<br><br>首期费用 ¥1,400 已结清，祝生意兴隆。`,cat:'sys'});
+        seedApps();snack('服务器已上架，开始营业！','ok');save();
+      }},
+      {t:'再想想',cls:'text'}]});
+}
+
+/* ================= 日志 ================= */
+function logLineHTML(e,fresh){
+  const c=e.lv==='ERROR'?'l-err':e.lv==='WARN'?'l-warn':e.lv==='OK'?'l-ok':'l-info';
+  return `<div class="tl ${c}${fresh?' new':''}"><span class="lt">${e.t}</span> <span class="ll">${e.lv.padEnd(5)}</span> ${e.msg}</div>`;
+}
+function matchFilter(e){return logFilter==='all'||(logFilter==='warn'?(e.lv==='WARN'||e.lv==='ERROR'):e.lv==='ERROR');}
+function appendLogLine(e){
+  const el=$('#term');
+  if(curPage==='logs'&&matchFilter(e)){
+    el.insertAdjacentHTML('beforeend',logLineHTML(e,true));
+    while(el.children.length>250)el.firstChild.remove();
+    if(el.scrollHeight-el.scrollTop-el.clientHeight<90)el.scrollTop=el.scrollHeight;
+  }
+}
+function addLog(lv,msg){
+  const e={t:dateStr(),lv,msg};
+  S.log.push(e);if(S.log.length>400)S.log.splice(0,S.log.length-400);
+  appendLogLine(e);
+}
+function bootLogs(){
+  addLog('INFO','=== 服务器运营模拟系统 v1.0 启动 ===');
+  addLog('INFO','机柜 A-12 · 1U 机架服务器已上电，BIOS 自检通过');
+  addLog('OK','Debian 12.6 启动完成，systemd 就绪');
+  addLog('INFO','eth0: Link is Up 1000Mbps Full Duplex');
+  addLog('INFO','带宽端口：10Mbps 独享 BGP 已生效 · 电费按峰谷分时计价');
+}
+function renderTerm(){
+  const el=$('#term');
+  el.innerHTML=S.log.filter(matchFilter).slice(-200).map(e=>logLineHTML(e,false)).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+function snack(msg,kind){
+  $('#snack-root').innerHTML=`<div class="snack ${kind||''}">${msg}</div>`;
+  clearTimeout(snack._t);snack._t=setTimeout(()=>{$('#snack-root').innerHTML=''},3200);
+}
+let dlgQueue=[],dlgOpen=false;
+function openDialog(o){dlgQueue.push(o);pumpDialog();}
+function pumpDialog(){
+  if(dlgOpen||!dlgQueue.length)return;
+  dlgOpen=true;const o=dlgQueue.shift();
+  const w=document.createElement('div');w.className='dlg-wrap';
+  w.innerHTML=`<div class="scrim2"></div><div class="dlg" role="dialog">
+    ${o.ic?`<span class="msr dlg-ic">${o.ic}</span>`:''}
+    <h2 class="dlg-title">${o.title}</h2>
+    <div class="dlg-body">${o.html||''}</div>
+    <div class="dlg-actions">${(o.btns||[{t:'确定',cls:'filled'}]).map((b,i)=>`<button class="tbtn ${b.cls||'text'} ripple" data-di="${i}">${b.t}</button>`).join('')}</div></div>`;
+  $('#dialog-root').appendChild(w);
+  w.querySelectorAll('[data-di]').forEach(b=>b.addEventListener('click',()=>{
+    const f=(o.btns||[])[+b.dataset.di];
+    w.classList.add('out');
+    setTimeout(()=>{w.remove();dlgOpen=false;pumpDialog();},160);
+    if(f&&f.f)f.f();
+  }));
+}
+function openSheetHtml(title,html){
+  $('#sheet-title').textContent=title;
+  $('#sheet-body').innerHTML=html;
+  const sh=$('#sheet'),sc=$('#scrim');
+  sh.hidden=false;sc.hidden=false;void sh.offsetWidth;
+  sh.classList.add('on');sc.classList.add('on');
+}
+function closeSheet(){
+  $('#sheet').classList.remove('on');$('#scrim').classList.remove('on');
+  setTimeout(()=>{$('#sheet').hidden=true;$('#scrim').hidden=true;},280);
+}
+$('#scrim').addEventListener('click',closeSheet);
+
+/* ================= 客户 ================= */
+function traitOf(r){return r<.25?'good':r<.65?'normal':r<.85?'picky':'lazy';}
+function creditOf(t){return t==='good'?ri(80,95):t==='normal'?ri(60,79):t==='picky'?ri(45,59):ri(20,44);}
+function genApp(ref){
+  const pool=Object.keys(TYPES).filter(k=>{
+    if(k==='video')return S.rep>=65;
+    if(k==='game'||k==='eshop')return S.rep>=55;
+    if(k==='db'||k==='api')return S.rep>=45;
+    return true;
+  });
+  const k=pick(pool),t=TYPES[k];
+  let nm=pick(NAMES[k]);
+  for(let i=0;i<4&&(S.clients.some(c=>c.name===nm)||S.apps.some(a=>a.name===nm));i++)nm=pick(NAMES[k]);
+  const tr=traitOf(Math.random());
+  S.apps.push({id:S.nid++,type:k,name:nm,ref:!!ref,trait:tr,credit:ref?ri(78,95):creditOf(tr),
+    cpu:Math.round(t.cpu*rnd(.9,1.1)),ram:+(t.ram*rnd(.9,1.1)).toFixed(1),
+    disk:Math.round(t.disk*rnd(.9,1.1)),bw:+(t.bw*rnd(.9,1.1)).toFixed(1),
+    pay:Math.round(t.pay*rnd(.9,1.15)*(ref?1.15:1)),beian:t.beian?Math.random()<.6:false,exp:S.gm+2880});
+  if(S.apps.length>5){const old=S.apps.shift();addLog('WARN',`业务申请「${old.name}」等待超时，已转投其他机房`);}
+  addLog('INFO',ref?`老客户转介绍：${nm}（${t.n}），报价上浮 15%`:`收到新的托管申请：${nm}（${t.n}）`);
+  S.dirty=true;
+}
+function genVip(){
+  const k=pick(['video','game','eshop','db']),t=TYPES[k];
+  const nm=pick(NAMES[k]);
+  const tr=Math.random()<.6?'good':'normal';
+  S.apps.push({id:S.nid++,type:k,name:nm,vip:true,trait:tr,credit:ri(75,95),
+    cpu:Math.round(t.cpu*2.2),ram:+(t.ram*2.2).toFixed(1),disk:Math.round(t.disk*2.2),bw:+(t.bw*2.2).toFixed(1),
+    pay:Math.round(t.pay*2.8),beian:t.beian?Math.random()<.5:false,exp:S.gm+2880});
+  addLog('INFO',`大客户来访：${nm} 询问整机托管方案（预算充足）`);
+  snack('🏢 大客户上门洽谈','ok');S.dirty=true;
+}
+function seedApps(){
+  for(const k of ['blog','corp','forum']){
+    const t=TYPES[k],tr=traitOf(Math.random());
+    S.apps.push({id:S.nid++,type:k,name:pick(NAMES[k]),trait:tr,credit:creditOf(tr),
+      cpu:t.cpu,ram:t.ram,disk:t.disk,bw:t.bw,
+      pay:Math.round(t.pay*rnd(.95,1.1)),beian:Math.random()<.6,exp:S.gm+2880});
+  }
+  addLog('INFO','开业第一天，收到 3 份托管申请');
+  S.dirty=true;renderLists();
+}
+function acceptApp(id){
+  const i=S.apps.findIndex(a=>a.id===id);if(i<0)return;
+  const a=S.apps.splice(i,1)[0];
+  if(ramUsedNow()+a.ram>ramCap())addLog('WARN',`注意：接入「${a.name}」后内存将超售，存在 OOM 风险`);
+  S.clients.push({id:a.id,type:a.type,name:a.name,cpu:a.cpu,ram:a.ram,disk:a.disk,bw:a.bw,pay:a.pay,
+    beian:a.beian,trait:a.trait,arrears:0,mailLow:false,mailHigh:false,
+    sat:80,noise:1,status:'online',downMin:0,joined:S.gm,crashTick:0,viral:false,fest:false,lastNego:0});
+  S.totalSigned++;
+  addLog('OK',`「${a.name}」已签约入驻（信用 ${a.credit}），systemctl start ${SVC[a.type]} 完成`);
+  snack(`已签约：${a.name} · ¥${a.pay}/月`,'ok');
+  checkMilestones();S.dirty=true;renderLists();save();
+}
+function rejectApp(id){
+  const i=S.apps.findIndex(a=>a.id===id);if(i<0)return;
+  const a=S.apps.splice(i,1)[0];
+  addLog('INFO',`已婉拒「${a.name}」的申请`);S.dirty=true;renderLists();
+}
+function removeClient(c,mode){
+  S.clients=S.clients.filter(x=>x!==c);
+  if(S.viral&&S.viral.id===c.id)S.viral=null;
+  if(mode==='leave'){S.rep=clamp(S.rep-4,5,99);S.left++;
+    addLog('ERROR',`客户「${c.name}」满意度仅 ${Math.round(c.sat)}%，终止合同并迁出机房`);
+    snack(`客户流失：${c.name}`,'err');}
+  else{S.rep=clamp(S.rep-2,5,99);addLog('WARN',`已与「${c.name}」解除合同，数据已迁出`);}
+  S.dirty=true;
+}
+function restartClient(id){
+  const c=S.clients.find(x=>x.id===id);if(!c)return;
+  if(c.status==='crashed'){c.status='online';c.sat=clamp(c.sat-2,0,100);
+    addLog('OK',`手动重启 ${SVC[c.type]} 成功（${c.name}）`);snack('服务已恢复','ok');}
+  else if(c.status==='online'){c.status='restarting';c.rUntil=S.gm+10;c.sat=clamp(c.sat-1,0,100);
+    addLog('INFO',`正在重启 ${SVC[c.type]}（${c.name}）…`);}
+  else{snack('当前状态无法重启');return;}
+  S.dirty=true;renderLists();
+}
+function endClient(id){
+  const c=S.clients.find(x=>x.id===id);if(!c)return;
+  openDialog({ic:'logout',title:'终止合同',html:`确定与 <b>${c.name}</b> 解除合同吗？<br>将损失少量口碑（-2）。`,
+    btns:[{t:'确认终止',cls:'filled',f:()=>{removeClient(c,'end');renderLists();}},{t:'取消',cls:'text'}]});
+}
+function negoClient(id){
+  const c=S.clients.find(x=>x.id===id);if(!c)return;
+  if(c.lastNego&&S.gm-c.lastNego<21600)return snack('客户近期已谈过，过段时间再来');
+  c.lastNego=S.gm;
+  if(Math.random()<clamp(c.sat/100*.85,.1,.9)){
+    c.pay=Math.round(c.pay*1.15);c.sat=clamp(c.sat-3,0,100);
+    addLog('OK',`与「${c.name}」续约谈判成功，月付上调至 ¥${c.pay}`);
+    snack(`涨价成功：¥${c.pay}/月`,'ok');
+  }else{
+    c.sat=clamp(c.sat-10,0,100);
+    addLog('WARN',`「${c.name}」拒绝涨价，并要求改善服务质量`);
+    snack('谈判破裂，满意度下降','err');
+    if(c.sat<25&&Math.random()<.4)removeClient(c,'leave');
+  }
+  S.dirty=true;renderLists();
+}
+function checkMilestones(){
+  const n=S.clients.length;
+  if(n>=1&&!S.flags.c1){S.flags.c1=true;snack('🎉 第一单生意成交！','ok');}
+  if(n>=5&&!S.flags.c5){S.flags.c5=true;S.rep=clamp(S.rep+3,5,99);snack('🎉 客户达到 5 家，口碑 +3','ok');}
+  if(n>=10&&!S.flags.c10){S.flags.c10=true;S.rep=clamp(S.rep+5,5,99);snack('🎉 客户突破 10 家，口碑 +5','ok');}
+  checkLevel();
+}
+function checkLevel(){
+  const lv=levelInfo().lv;
+  if(lv>S.lvShown){S.lvShown=lv;
+    addLog('OK',`机房等级提升：Lv.${lv+1} · ${LEVELS[lv][1]}`);
+    snack(`🎉 升级：Lv.${lv+1} · ${LEVELS[lv][1]}`,'ok');}
+}
+
+/* ================= 硬件 / 采购 ================= */
+function failPart(part,reason,cost){
+  S.repairing={part,reason,cost,phase:'pay'};
+  S.incidents++;S.rep=clamp(S.rep-3,5,99);S.dirty=true;
+  addLog('ERROR',`${PN[part]}故障：${reason}，服务器宕机！`);
+  snack('⚠ 硬件故障，服务器宕机','err');
+  sendMail({from:'monitor@serverops.cn',fromName:'ServerOps 监控中心',subject:`【故障】${PN[part]}硬件故障，服务器宕机`,
+    body:`监测到 ${PN[part]}异常：${reason}。<br><br>服务器已离线，全部客户受影响。请前往「硬件」页面支付维修费，工程师将上门更换。`,cat:'sec'});
+}
+function repair(){
+  if(!S.repairing||S.repairing.phase!=='pay')return;
+  if(S.money<S.repairing.cost)return snack('余额不足，无法维修','err');
+  S.money-=S.repairing.cost;S.totalOut+=S.repairing.cost;
+  S.hw.health[S.repairing.part]=100;
+  const base=(S.hw.ops?15:30)*(isSpringFest()?2:1);
+  S.repairing.phase='fix';S.repairing.until=S.gm+base;
+  addLog('INFO',`已支付维修费 ¥${fmt(S.repairing.cost)}，工程师正在更换 ${PN[S.repairing.part]}…`);
+  S.dirty=true;renderLists();save();
+}
+function replacePart(part){
+  const cost=replaceCost(part);
+  if(S.money<cost)return snack('余额不足','err');
+  S.money-=cost;S.totalOut+=cost;S.hw.health[part]=100;
+  addLog('OK',`已预防性更换 ${PN[part]}，健康度恢复 100%`);
+  snack('更换完成','ok');S.dirty=true;renderLists();save();
+}
+function specTxt(cat,t){
+  return{cpu:`${t.c}核 ${t.f}GHz`,ram:`${t.g}GB`,disk:t.g>=1024?(t.g/1024)+'TB':t.g+'GB',
+    bw:t.v+'Mbps',psu:t.w+'W',cool:`降温 ${t.off}°C`}[cat];
+}
+function buyItem(cat){
+  const next=TIERS[cat][S.hw[cat]+1];
+  if(!next)return snack('已是最高配置');
+  if(S.repairing)return snack('服务器维修中，无法施工','err');
+  if(S.pendingUp)return snack('已有升级在施工中','err');
+  const baseP=next.p,usedCoupon=couponOn()&&baseP>0;
+  const price=tierPrice(cat,S.hw[cat]+1);
+  if(S.money<price)return snack('余额不足','err');
+  S.money-=price;S.totalOut+=price;
+  if(usedCoupon)S.couponUsed=true;
+  const tag=usedCoupon?'（代金券已抵扣 ¥500）':'';
+  if(cat==='bw'){
+    S.hw.bw++;
+    addLog('OK',`运营商远程调整端口完成：${next.m}，即时生效`);
+    snack(`带宽已升级：${next.m}${tag}`,'ok');
+  }else{
+    S.pendingUp={cat,tier:S.hw[cat]+1,until:S.gm+30,name:next.m};
+    addLog('WARN',`已购入 ${next.m}，工程师上门安装中（停机约 30 分钟）`);
+    snack(`施工中：${next.m}${tag}（停机约 30 分钟）`);
+  }
+  S.dirty=true;renderLists();save();
+}
+function buySvc(k){
+  const v=SVCS[k];
+  if(k!=='ads'&&S.hw[k])return;
+  if(S.money<v.p)return snack('余额不足','err');
+  S.money-=v.p;S.totalOut+=v.p;
+  if(k==='ads'){S.marketingUntil=S.gm+4320;addLog('OK','已投放获客广告，未来 3 天申请增多');snack('广告已投放','ok');}
+  else{S.hw[k]=true;addLog('OK',k==='ops'?'运维工程师已到岗，工单将自动处理':`已开通：${v.n}`);snack(k==='ops'?'工程师到岗':'已开通：'+v.n,'ok');}
+  S.dirty=true;renderLists();save();
+}
+function shopHtml(){
+  const cats=[['cpu','处理器'],['ram','内存'],['disk','存储'],['bw','带宽 · 远程生效'],['psu','电源'],['cool','散热']];
+  let html='';
+  if(S.sale)html+=`<div class="sale-banner"><span class="msr f">sell</span>供应商限时促销 · 硬件全线 7 折 · 剩 ${Math.max(1,Math.ceil((S.sale.until-S.gm)/60))} 小时</div>`;
+  if(couponOn())html+=`<div class="sale-banner coupon"><span class="msr f">confirmation_number</span>硬件代金券 · 本单自动抵扣 ¥500</div>`;
+  html+=cats.map(([cat,lb])=>{
+    const cur=S.hw[cat],next=TIERS[cat][cur+1];
+    const price=next?tierPrice(cat,cur+1):0;
+    return`<div class="sh-sec" id="sh-${cat}"><div class="sh-h">${lb}</div><div class="sh-item">
+      <div class="sh-cur"><span class="msr f">check_circle</span>当前：${TIERS[cat][cur].m}</div>
+      ${next?`<div class="sh-next"><div><b>${next.m}</b><span>${specTxt(cat,next)}${cat==='bw'?' · 免停机':''}</span></div>
+        <button class="tbtn ${S.money>=price?'filled':'outlined'} ripple sm" data-act="buy" data-cat="${cat}" ${S.money>=price?'':'disabled'}>${S.sale||couponOn()?`<s>¥${fmt(next.p)}</s>¥${fmt(price)}`:`¥${fmt(price)}`}</button></div>`
+      :'<div class="sh-max">已是顶级配置</div>'}</div></div>`;
+  }).join('');
+  html+='<div class="sh-sec"><div class="sh-h">增值服务</div>'+Object.entries(SVCS).map(([k,v])=>{
+    const owned=S.hw[k]&&!v.repeat;
+    let right;
+    if(owned)right='<span class="onchip">已启用</span>';
+    else if(k==='ads'&&S.marketingUntil>S.gm)right=`<span class="onchip">生效中 ${Math.ceil((S.marketingUntil-S.gm)/60)}h</span>`;
+    else right=`<button class="tbtn ${S.money>=v.p?'filled':'outlined'} ripple sm" data-act="buy-svc" data-key="${k}" ${S.money>=v.p?'':'disabled'}>¥${fmt(v.p)}</button>`;
+    return`<div class="sh-svc"><div><b>${v.n}</b><span>${v.d}</span></div>${right}</div>`;
+  }).join('')+'</div>';
+  return html;
+}
+function openShop(cat){
+  openSheetHtml('设备采购',shopHtml());
+  if(cat)setTimeout(()=>{const el=$('#sh-'+cat);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},320);
+}
+
+/* ================= 主模拟循环 ================= */
+function tick(){
+  S.gm+=TICK_MIN;
+  const h=hourOf(),day=dayNum(),sf=isSpringFest();
+
+  if(S.pendingUp&&S.gm>=S.pendingUp.until){
+    const u=S.pendingUp;S.pendingUp=null;
+    S.hw[u.cat]=u.tier;
+    const hv=u.usedHealth||100;
+    if(u.cat==='cpu')S.hw.health.cpu=hv;if(u.cat==='ram')S.hw.health.ram=hv;if(u.cat==='disk')S.hw.health.disk=hv;
+    addLog('OK',`硬件安装完成：${u.name}，服务器恢复上线`);
+    snack(`升级完成：${u.name}`,'ok');S.dirty=true;
+  }
+  const serverDown=!!S.repairing||!!S.pendingUp||S.thermal||S.rebooting>0;
+
+  if(S.rebooting>0){S.rebooting--;
+    if(S.rebooting===0){S.clients.forEach(c=>{if(c.status==='down'||c.status==='crashed'||c.status==='restarting')c.status='online';});
+      addLog('OK','服务器重启完成，所有服务已恢复');S.dirty=true;}}
+  if(S.repairing&&S.repairing.phase==='fix'&&S.gm>=S.repairing.until){
+    addLog('OK',`维修完成：${S.repairing.reason}已排除，服务器重新上线`);
+    S.repairing=null;S.dirty=true;}
+
+  for(const c of [...S.clients]){
+    if(serverDown){if(c.status!=='beian')c.status='down';}
+    else{
+      if(c.status==='down')c.status='online';
+      else if(c.status==='crashed'){if(S.hw.autoR&&S.gm-c.crashTick>=30){c.status='online';addLog('OK',`守护进程自动拉起 ${SVC[c.type]}（${c.name}）`);}}
+      else if(c.status==='restarting'&&S.gm>=c.rUntil)c.status='online';
+    }
+    if(c.status==='beian'&&S.gm>=c.bUntil){
+      if(c.beianPaid){c.status='online';c.beian=true;addLog('OK',`「${c.name}」ICP 备案完成，恢复解析`);}
+      else removeClient(c,'leave');
+    }
+  }
+
+  let cpuD=0,bwD=0,ramU=0;
+  for(const c of S.clients){
+    if(c.status!=='crashed')ramU+=c.ram;
+    if(c.status!=='online')continue;
+    c.noise=clamp(c.noise+(Math.random()-.5)*.12,.75,1.3);
+    const m=curve(TYPES[c.type].grp,h,sf)*c.noise*(c.viral?3:1)*(c.fest?3:1);
+    cpuD+=c.cpu*m;bwD+=c.bw*m;
+  }
+  if(S.ddos)bwD+=S.ddos.mag;
+  const cap=cpuCap(),bce=bwCapEff();
+  const cpuLoad=cap>0?cpuD/cap*100:0,bwLoad=bwD/bce*100;
+  const diskUsed=20+S.logsGB+S.clients.reduce((s,c)=>s+c.disk,0);
+  const diskPct=diskUsed/diskCap()*100;
+  S.m={cpuD,bwD,cpuLoad,bwLoad,ramU,diskUsed,diskPct,bwCap:bce};
+
+  if(ramU>ramCap()&&Math.random()<.04+(ramU/ramCap()-1)*.3){
+    const c=pick(S.clients.filter(x=>x.status==='online'));
+    if(c){c.status='crashed';c.crashTick=S.gm;c.sat=clamp(c.sat-15,0,100);S.incidents++;S.dirty=true;
+      addLog('ERROR',`内存耗尽：OOM Killer 终止进程 ${SVC[c.type]}（${c.name}）· ${fmt1(ramU)}G/${ramCap()}G`);}
+  }
+  S.logsGB+=(0.02+clamp(cpuLoad,0,120)/100*.10+S.clients.length*.004)*(S.hw.rotate?.35:1);
+  if(diskPct>95&&Math.random()<.06){
+    const c=pick(S.clients.filter(x=>x.status==='online'));
+    if(c){c.status='crashed';c.crashTick=S.gm;c.sat=clamp(c.sat-12,0,100);S.incidents++;S.dirty=true;
+      addLog('ERROR',`磁盘空间不足（${Math.round(diskPct)}%）：${SVC[c.type]} 写入失败（${c.name}）`);}
+  }
+
+  const ambient=26+(S.acDown?8:0)+(S.heatwave?5:0);
+  const target=ambient+clamp(cpuLoad,0,130)*.5+clamp(bwLoad,0,160)*.05-coolOff()+perfHeat();
+  S.temp+=(target-S.temp)*.12+(Math.random()-.5)*.5;
+  if(!S.thermal&&S.temp>=82){S.thermal=true;addLog('ERROR','CPU 温度 ≥82°C，触发过热保护，算力下降 40%');}
+  if(S.thermal){
+    if(S.temp>=93){S.thermal=false;
+      addLog('ERROR','温度 ≥93°C，服务器过热自动关机！');
+      failPart('cpu','过热自动关机，等待检修',Math.round(300+TIERS.cpu[S.hw.cpu].p*.15));
+      S.rep=clamp(S.rep-6,5,99);}
+    else if(S.temp<65){S.thermal=false;addLog('OK','温度回落至安全区间，过热保护解除');}
+  }
+
+  S.watts=Math.round((70+clamp(cpuLoad,0,120)*1.9+clamp(bwLoad,0,160)*.25+S.clients.length*4)*perfPowF());
+  const kwhTick=S.watts/1000*(TICK_MIN/60);
+  S.kwh+=kwhTick;S.elecCost+=kwhTick*priceNow(h);
+  if(S.watts>psuW()&&Math.random()<.02){
+    addLog('ERROR',`电源过载（${S.watts}W > ${psuW()}W），服务器意外断电！`);
+    S.rebooting=2;S.incidents++;
+  }
+
+  const od=S.hw.ops?.6:1,heat=S.temp>75?(S.temp-75)*.004:0;
+  S.hw.health.cpu=clamp(S.hw.health.cpu-(.004+heat+(cpuLoad>95?.01:0))*od,0,100);
+  S.hw.health.ram=clamp(S.hw.health.ram-.003*od,0,100);
+  S.hw.health.disk=clamp(S.hw.health.disk-(.005+(diskPct>85?.012:0))*od,0,100);
+  for(const p of ['cpu','ram','disk']){
+    const key='w'+p;
+    if(S.hw.health[p]<40&&!S.flags[key]){S.flags[key]=true;
+      addLog('WARN',`SMART 预警：${PN[p]}健康度低于 40%，故障风险显著上升，建议尽快更换`);}
+    if(S.hw.health[p]>=90)S.flags[key]=false;
+  }
+  if(!S.repairing){
+    for(const part of ['cpu','ram','disk']){
+      const hl=S.hw.health[part];
+      if(hl<55&&Math.random()<(55-hl)*.00035){
+        failPart(part,{cpu:'CPU 硬件故障',ram:'内存 ECC 校验连续报错',disk:'NVMe 固态硬盘掉盘（SMART 异常）'}[part],
+          {cpu:Math.round(350+TIERS.cpu[S.hw.cpu].p*.18),ram:Math.round(250+TIERS.ram[S.hw.ram].p*.2),disk:Math.round(300+TIERS.disk[S.hw.disk].p*.2)}[part]);
+        break;
+      }
+    }
+  }
+
+  /* ---- 随机事件 ---- */
+  if(S.ddos&&S.gm>=S.ddos.until){S.ddos=null;addLog('OK','DDoS 攻击流量已消退，带宽恢复正常');
+    if(!S.flags.ddosWin){S.flags.ddosWin=true;snack('🎉 成功抵御了一次 DDoS 攻击','ok');}}
+  if(!S.ddos&&day>=4&&S.clients.length>=2&&Math.random()<.0009){
+    const mag=Math.round(bwCap()*rnd(3,8)+60);
+    if(S.hw.ddos){addLog('OK',`高防 IP 自动清洗攻击流量（SYN Flood ${mag}Mbps），业务无感知`);snack('高防拦截了一次攻击','ok');}
+    else{
+      S.ddos={mag,until:S.gm+ri(18,54)};
+      addLog('ERROR',`检测到 DDoS 攻击（SYN Flood），入站流量 +${mag}Mbps！`);
+      sendMail({from:'sec@serverops.cn',fromName:'ServerOps 安全中心',subject:`【安全告警】检测到 DDoS 攻击 +${mag}Mbps`,
+        body:`流量清洗平台检测到 SYN Flood 攻击，峰值约 <b>${mag}Mbps</b>，带宽端口拥塞。<br><br>建议立即处理，详见控制面板弹窗。`,cat:'sec'});
+      openDialog({ic:'gpp_maybe',title:'遭受 DDoS 攻击',
+        html:`攻击流量约 <b>${mag} Mbps</b>，带宽端口严重拥塞，客户站点访问缓慢甚至超时。<br><br>预计攻击持续约 <b>${Math.round((S.ddos.until-S.gm)/6)/10} 小时</b>。`,
+        btns:[
+          {t:'临时清洗 ¥800',cls:'filled',f:()=>{if(S.money>=800){S.money-=800;S.totalOut+=800;S.ddos=null;addLog('OK','已购买上游临时清洗，攻击流量被引流');snack('攻击已清洗','ok');}else snack('余额不足，只能硬扛','err');}},
+          {t:'开通高防 ¥600/月',cls:'tonal',f:()=>{S.hw.ddos=true;S.ddos=null;addLog('OK','已接入高防 IP，攻击被自动清洗');snack('高防 IP 已生效','ok');S.dirty=true;}},
+          {t:'硬扛',cls:'text',f:()=>addLog('WARN','选择不处理，带宽持续拥塞，客户满意度下降')},
+        ]});
+    }
+  }
+  if(S.fiberCut&&S.gm>=S.fiberCut.until){S.fiberCut=null;addLog('OK','上游光缆抢修完成，带宽端口恢复正常');snack('光缆已修复','ok');}
+  if(!S.fiberCut&&day>=8&&Math.random()<.0006){
+    S.fiberCut={until:S.gm+ri(12,36)};
+    addLog('ERROR','市政施工挖断上游光缆，可用带宽降至 20%，运营商正在抢修！');
+    snack('⚠ 上游光缆故障','err');
+    sendMail({from:'noc@idc-a12.cn',fromName:'IDC-A12 NOC',subject:'【线路故障】上游光缆中断，带宽降级',
+      body:'市政施工挖断上游光缆，你的带宽端口临时降级至 20%。运营商已派抢修队，预计数小时内恢复。',cat:'sys'});
+  }
+  if(S.acDown&&S.gm>=S.acDown.until){S.acDown=null;addLog('OK','机房精密空调修复，环境温度回落至 26°C');}
+  if(!S.acDown&&day>=5&&Math.random()<.0007){
+    S.acDown={until:S.gm+ri(24,48)};
+    addLog('WARN','机房精密空调故障，环境温度升至 34°C，注意温度曲线！');
+    openDialog({ic:'hvac',title:'机房空调故障',
+      html:`IDC 机房精密空调停机，环境温度升至 <b>34°C</b>，服务器进风温度持续攀升，可能触发过热降频。<br><br>· 出资请机房加急维修：<b>¥400</b><br>· 等机房自己修（约 2~4 小时）`,
+      btns:[
+        {t:'加急维修 ¥400',cls:'filled',f:()=>{if(S.money>=400){S.money-=400;S.totalOut+=400;S.acDown=null;addLog('OK','已加急修复机房空调，环境温度回落');snack('空调已修复','ok');}else snack('余额不足','err');}},
+        {t:'等着吧',cls:'text',f:()=>addLog('WARN','等待机房处理空调故障')},
+      ]});
+  }
+  if(S.heatwave&&S.gm>=S.heatwave.until){S.heatwave=null;addLog('OK','热浪结束，环境温度恢复正常');}
+  if(!S.heatwave&&day>=15&&Math.random()<.0005){
+    S.heatwave={until:S.gm+ri(144,288)};
+    addLog('WARN','气象台发布高温橙色预警，机房进风温度上升 +5°C');
+  }
+  if(S.priceHike&&S.gm>=S.priceHike.until){S.priceHike=null;addLog('OK','电价恢复正常水平');}
+  if(!S.priceHike&&day>=20&&Math.random()<.0004){
+    S.priceHike={until:S.gm+4320};
+    addLog('WARN','供电局通知：迎峰度夏，电价上浮 15%（30 天）');
+    sendMail({from:'power@idc-a12.cn',fromName:'IDC-A12 电力保障部',subject:'【电价调整】迎峰度夏电价上浮 15%',
+      body:'接供电局通知，未来 30 天执行迎峰度夏电价，整体上浮 15%。请合理安排高负载时段。',cat:'sys'});
+  }
+  if(S.burst&&S.gm>=S.burst.until){S.burst=null;addLog('INFO','带宽突发扩容已到期，端口恢复标称带宽');}
+  if(!S.maint&&day>=25&&Math.random()<.0005){
+    S.maint={at:S.gm+2880,done:false};
+    addLog('INFO','IDC 通知：48 小时后市电检修，届时停机约 20 分钟');
+    sendMail({from:'noc@idc-a12.cn',fromName:'IDC-A12 NOC',subject:'【计划维护】48 小时后市电检修（工单 GD-'+ri(1000,9999)+'）',
+      body:'机房将于 48 小时后进行市电线路检修，期间你的服务器将停机约 <b>20 分钟</b>。<br><br>请提前安排数据备份，避免在维护窗口进行大额交易推广。',cat:'sys'});
+  }
+  if(S.maint&&!S.maint.done&&S.gm>=S.maint.at){
+    S.maint.done=true;S.rebooting=2;
+    addLog('WARN','计划维护开始：市电检修，服务器停机');
+  }
+  if(S.maint&&S.maint.done&&S.gm>S.maint.at+60)S.maint=null;
+  if(sf&&!S.flags.sfNoted){S.flags.sfNoted=true;
+    addLog('INFO','春节假期：企业客户流量回落，消费类流量上升；工程师返乡，维修耗时翻倍');}
+  if(!sf)S.flags.sfNoted=false;
+  if(S.vuln&&S.gm>S.vuln.until){S.vuln=null;S.vulnRisk=true;addLog('WARN','漏洞窗口期已过，未修补，系统暴露在风险中');}
+  if(!S.vuln&&!S.vulnRisk&&day>=6&&Math.random()<.00055){
+    S.vuln={until:S.gm+288};
+    const name=pick(['OpenSSL 高危漏洞','内核提权漏洞 (CVE-2026-1337)','Log4j 风格远程执行漏洞','SSH 弱口令爆破告警']);
+    addLog('WARN',`安全通告：${name}`);
+    sendMail({from:'sec@serverops.cn',fromName:'ServerOps 安全中心',subject:`【安全通告】${name}`,
+      body:`你的服务器受 <b>${name}</b> 影响。<br><br>建议 48 小时内修补（需重启生效），否则存在被入侵风险。`,cat:'sec'});
+    openDialog({ic:'bug_report',title:'安全漏洞通告',
+      html:`监测到 <b>${name}</b>，你的服务器受影响。<br><br>· <b>立即修补</b>：需重启生效，全部服务中断约 30 分钟<br>· <b>忽略</b>：48 小时内可能被入侵（数据泄露、挖矿木马）`,
+      btns:[
+        {t:'立即修补（停机 30 分钟）',cls:'filled',f:()=>{S.vuln=null;S.rebooting=3;addLog('INFO','正在修补漏洞，执行重启…');snack('修补中，服务短暂中断');}},
+        {t:'先不处理',cls:'text',f:()=>addLog('WARN','选择暂不修补漏洞')},
+      ]});
+  }
+  if(S.vulnRisk&&Math.random()<.0015){
+    S.vulnRisk=false;S.incidents++;
+    if(S.hw.snap||(S.gm-S.backupAt<10080)){
+      S.money-=1200;S.totalOut+=1200;S.rep=clamp(S.rep-4,5,99);
+      addLog('ERROR','检测到入侵痕迹，已用最近快照恢复，直接损失 ¥1,200');snack('快照备份化解了入侵','ok');
+    }else{
+      const fine=ri(2500,6000);S.money-=fine;S.totalOut+=fine;S.rep=clamp(S.rep-8,5,99);
+      addLog('ERROR',`服务器被植入挖矿木马，客户数据泄露，被监管罚款 ¥${fmt(fine)}`);
+      snack(`安全事故：罚款 ¥${fmt(fine)}`,'err');
+    }
+  }
+  if(day-S.lastInsp>=40&&day>=30&&Math.random()<.0004){
+    S.lastInsp=day;
+    if(S.vulnRisk){
+      const fine=ri(1500,3000);S.money-=fine;S.totalOut+=fine;S.rep=clamp(S.rep-5,5,99);
+      addLog('ERROR',`网安突击检查：发现未修复高危漏洞，被约谈并罚款 ¥${fmt(fine)}`);
+      snack(`监管罚款 ¥${fmt(fine)}`,'err');
+    }else if(S.hw.snap&&S.hw.ddos){
+      S.rep=clamp(S.rep+3,5,99);
+      addLog('OK','网安例行检查通过，安全建设获通报表扬，口碑 +3');
+    }else addLog('INFO','网安例行检查通过，无异常');
+  }
+  if(day-S.lastBeian>=12&&S.clients.length&&Math.random()<.0014){
+    const c=S.clients.find(x=>TYPES[x.type].beian&&!x.beian&&x.status==='online');
+    if(c){S.lastBeian=day;c.status='beian';c.bUntil=S.gm+144;c.beianPaid=false;S.dirty=true;
+      addLog('WARN',`「${c.name}」无 ICP 备案，域名解析被暂停`);
+      sendMail({from:'heguibian@idc-a12.cn',fromName:'IDC-A12 合规部',subject:`【合规】${c.name} 未完成 ICP 备案`,
+        body:`客户「${c.name}」的网站未取得 ICP 备案，域名解析已暂停。<br><br>可协助加急备案（¥200，约 1 天），否则客户将迁出。`,cat:'sys'});
+      openDialog({ic:'verified_user',title:'ICP 备案抽查',
+        html:`客户 <b>${c.name}</b> 的网站未取得 ICP 备案，接入商已暂停其域名解析。<br><br>· 协助加急备案：<b>¥200</b>（约 1 天完成）<br>· 不处理：客户将迁走`,
+        btns:[
+          {t:'协助备案 ¥200',cls:'filled',f:()=>{if(S.money>=200){S.money-=200;S.totalOut+=200;c.beianPaid=true;addLog('INFO',`已提交「${c.name}」加急备案`);}else snack('余额不足，备案失败','err');}},
+          {t:'不处理',cls:'text',f:()=>{}},
+        ]});
+    }
+  }
+  if(day-S.lastPower>=18&&Math.random()<.0009){
+    S.lastPower=day;
+    if(S.hw.ups){addLog('OK','市电波动，UPS 电池无缝接管，业务零感知');snack('UPS 立功了 ✓','ok');}
+    else{S.rebooting=2;S.incidents++;addLog('ERROR','机房市电波动，服务器异常重启！');snack('市电波动导致宕机','err');}
+  }
+  if(day-S.lastTicket>=6&&S.clients.length>=1&&Math.random()<.001){
+    const c=pick(S.clients);S.lastTicket=day;
+    const issue=pick(['网站偶尔返回 502','数据库查询明显变慢','晚高峰访问卡顿','后台邮件发不出去','SSL 证书即将过期告警']);
+    if(S.hw.ops){c.sat=clamp(c.sat+4,0,100);addLog('OK',`运维工程师已处理工单：${c.name} · ${issue}`);}
+    else{
+      sendMail({from:`ops@client-${c.id}.cn`,fromName:c.name,subject:`【工单 #${ri(10000,99999)}】${issue}`,
+        body:`你好，我们${issue.replace(/^网站/,'的网站').replace(/^数据库/,'的数据库')}，麻烦尽快看一下。`,cat:'client',act:'apologize',cid:c.id});
+      openDialog({ic:'support_agent',title:'客户工单',
+        html:`<b>${c.name}</b> 提交工单：「${issue}」<br><br>· 立即排查：工程师加班费 <b>¥50</b>，满意度 +8<br>· 挂起稍后处理：满意度 -6`,
+        btns:[
+          {t:'立即排查 ¥50',cls:'filled',f:()=>{if(S.money>=50){S.money-=50;S.totalOut+=50;c.sat=clamp(c.sat+8,0,100);addLog('OK',`工单已解决：${c.name} · ${issue}`);snack('工单已关闭','ok');}else snack('余额不足','err');}},
+          {t:'稍后处理',cls:'text',f:()=>{c.sat=clamp(c.sat-6,0,100);addLog('WARN',`工单挂起：${c.name} · ${issue}`);}},
+        ]});
+    }
+  }
+  if(day-S.lastPoach>=25&&S.clients.length>=3&&Math.random()<.0005){
+    const c=[...S.clients].sort((a,b)=>a.sat-b.sat)[0];
+    S.lastPoach=day;
+    openDialog({ic:'group_remove',title:'同行挖角',
+      html:`「${c.name}」（满意度 ${Math.round(c.sat)}%）收到竞品机房的低价邀请。<br><br>· 主动让利 <b>10%</b> 挽留<br>· 听天由命（约 50% 概率流失）`,
+      btns:[
+        {t:'让利 10% 挽留',cls:'filled',f:()=>{c.pay=Math.round(c.pay*.9);c.sat=clamp(c.sat+12,0,100);addLog('OK',`已让利挽留「${c.name}」，月付降至 ¥${c.pay}`);snack('挽留成功','ok');}},
+        {t:'听天由命',cls:'text',f:()=>{if(Math.random()<.5)removeClient(c,'leave');else{c.sat=clamp(c.sat+5,0,100);addLog('OK',`「${c.name}」对比一圈后决定留下`);}}},
+      ]});
+  }
+  if(day-S.lastRecover>=20&&S.clients.length>=2&&Math.random()<.0006){
+    const c=pick(S.clients);S.lastRecover=day;
+    const hasBak=S.hw.snap||(S.gm-S.backupAt<10080);
+    openDialog({ic:'database',title:'客户误删数据',
+      html:`<b>${c.name}</b> 的运维误删了数据库，紧急求助恢复 ${ri(20,180)}GB 数据。<br><br>${hasBak?'你有可用快照，恢复约需 1 小时。':'你没有可用快照，只能尝试底层扫描（成功率约 35%）。'}`,
+      btns:hasBak?[
+        {t:'用快照恢复（1 小时）',cls:'filled',f:()=>{c.sat=clamp(c.sat+12,0,100);c.pay=Math.round(c.pay*1.05);addLog('OK',`已用快照恢复「${c.name}」数据，客户追加月付 +5%`);snack('数据恢复成功','ok');}},
+        {t:'婉拒',cls:'text',f:()=>{c.sat=clamp(c.sat-10,0,100);}},
+      ]:[
+        {t:'底层扫描（可能失败）',cls:'filled',f:()=>{if(Math.random()<.35){c.sat=clamp(c.sat+8,0,100);addLog('OK',`底层扫描成功恢复「${c.name}」部分数据`);snack('侥幸恢复成功','ok');}else{c.sat=clamp(c.sat-18,0,100);addLog('ERROR',`数据恢复失败，「${c.name}」损失惨重`);if(c.sat<25)removeClient(c,'leave');}}},
+        {t:'婉拒',cls:'text',f:()=>{c.sat=clamp(c.sat-12,0,100);}},
+      ]});
+  }
+  if(!S.sale&&day>=10&&Math.random()<.0005){
+    S.sale={until:S.gm+144};
+    addLog('INFO','硬件供应商促销：24 小时内升级硬件全线 7 折');
+    snack('🛒 硬件促销 · 24 小时 7 折','ok');
+    sendMail({from:'sales@hw-mall.cn',fromName:'硬件供应商-华芯达',subject:'【限时 24h】全线硬件 7 折',
+      body:'老客户专享：24 小时内升级 CPU / 内存 / 硬盘 / 电源 / 散热全线 7 折，库存有限。<br><br>点击下方按钮直达采购页。',cat:'promo',act:'shop'});
+  }
+  if(S.sale&&S.gm>=S.sale.until){S.sale=null;addLog('INFO','硬件促销活动已结束');}
+  if(day-S.lastSpam>=10&&Math.random()<.002){
+    S.lastSpam=day;
+    const s=pick(SPAMS);
+    sendMail({from:'ad@'+ri(100,999)+'.biz',fromName:s.f,subject:s.s,body:s.b,cat:'promo',act:s.id==='coupon'?'coupon':'unsub'});
+  }
+  if(day-S.lastUsed>=20&&Math.random()<.0006){
+    const cat=pick(['ram','disk'].filter(c=>TIERS[c][S.hw[c]+1]));
+    if(cat){
+      S.lastUsed=day;
+      const next=TIERS[cat][S.hw[cat]+1],price=Math.round(next.p*.45);
+      openDialog({ic:'recycling',title:'二手硬件商上门',
+        html:`有人兜售一批拆机 <b>${next.m}</b>，只要 <b>¥${fmt(price)}</b>（全新 ¥${fmt(next.p)}）。<br><br>二手货健康度约 <b>55%</b>，无保修，安装同样需要停机 30 分钟。`,
+        btns:[
+          {t:`买下 ¥${fmt(price)}`,cls:'filled',f:()=>{
+            if(S.pendingUp||S.repairing)return snack('施工中/维修中，无法安装','err');
+            if(S.money<price)return snack('余额不足','err');
+            S.money-=price;S.totalOut+=price;
+            S.pendingUp={cat,tier:S.hw[cat]+1,until:S.gm+30,name:next.m+'（二手）',usedHealth:55};
+            addLog('WARN',`购入二手 ${next.m}，工程师安装中（停机 30 分钟）`);
+          }},
+          {t:'不要',cls:'text',f:()=>{}},
+        ]});
+    }
+  }
+  if(S.rep>=68&&S.clients.length>=4&&S.apps.length<5&&!S.apps.some(a=>a.vip)&&Math.random()<.0004)genVip();
+  if(day-S.lastBadSec>=15&&Math.random()<.0004){
+    S.lastBadSec=day;
+    S.hw.health.disk=clamp(S.hw.health.disk-15,0,100);
+    addLog('WARN','SMART 检测到新增磁盘坏道，硬盘健康度 -15');
+  }
+  const md=dateStr().slice(0,5),fk=md.replace('-','');
+  if(FEST[md]&&!S.festDone[fk]&&S.clients.some(c=>c.type==='eshop'||c.type==='video')){
+    S.festDone[fk]=true;S.fest={until:S.gm+144};
+    S.clients.forEach(c=>{if((c.type==='eshop'||c.type==='video')&&c.status!=='crashed')c.fest=true;});
+    addLog('INFO',`${FEST[md]}开始，电商 / 视频客户流量暴涨 ×3！`);
+    snack(`🛍 ${FEST[md]}流量高峰来袭`);S.dirty=true;
+  }
+  if(S.fest&&S.gm>=S.fest.until){
+    S.fest=null;
+    const handled=S.m.bwLoad<95;
+    S.clients.forEach(c=>{if(c.fest){c.fest=false;if(handled){c.pay=Math.round(c.pay*1.1);c.sat=clamp(c.sat+6,0,100);}}});
+    addLog(handled?'OK':'WARN',`大促结束${handled?'，保障有力，电商客户月付 +10%':'，期间带宽吃紧，客户颇有微词'}`);
+    S.dirty=true;
+  }
+  if(S.viral&&S.gm>=S.viral.until){
+    const c=S.clients.find(x=>x.id===S.viral.id);S.viral=null;
+    if(c){c.viral=false;
+      if(S.m.bwLoad<95){c.pay=Math.round(c.pay*1.15);c.sat=clamp(c.sat+10,0,100);S.rep=clamp(S.rep+2,5,99);
+        addLog('OK',`「${c.name}」热度消退，保障有力，客户追加预算，月付 +15%`);}
+      else{c.sat=clamp(c.sat-8,0,100);addLog('WARN',`「${c.name}」流量高峰期间带宽不足，客户不满`);}
+      S.dirty=true;}
+  }
+  if(!S.viral&&S.clients.length>=2&&Math.random()<.0007){
+    const c=pick(S.clients.filter(x=>x.status==='online'));
+    if(c){c.viral=true;S.viral={id:c.id,until:S.gm+72};
+      addLog('INFO',`「${c.name}」突然爆火（上了热搜），流量 ×3！`);snack(`「${c.name}」流量暴涨`);}
+  }
+  if(day-S.lastGood>=8&&S.clients.length>=3&&Math.random()<.001){
+    const avg=S.clients.reduce((s,c)=>s+c.sat,0)/S.clients.length;
+    if(avg>82){S.lastGood=day;S.rep=clamp(S.rep+2,5,99);
+      addLog('OK',`「${pick(S.clients).name}」在技术论坛发帖称赞你的机房，口碑 +2`);
+      if(S.apps.length<5&&Math.random()<.6)genApp(true);}
+  }
+
+  const online=S.clients.filter(x=>x.status==='online');
+  if(online.length&&Math.random()<.35){
+    const c=pick(online);
+    const path=pick(['/index.html','/api/user/info','/api/order/list','/static/app.js','/login','/upload/img','/search?q=server','/favicon.ico','/api/pay/notify','/health']);
+    const slow=S.m.cpuLoad>90;
+    const code=Math.random()<(slow?.9:.97)?200:pick([301,304,404,500,502]);
+    addLog(code>=500?'WARN':'INFO',`${SVC[c.type]}: ${code} GET ${path} ${ri(8,slow?ri(400,1200):120)}ms`);
+  }
+
+  if(S.apps.length<5){
+    const interval=clamp(3.4-S.rep*.028-(S.marketingUntil>S.gm?1.3:0),.6,4);
+    if(Math.random()<1/(interval*144))genApp(false);
+  }
+  let ch=false;
+  S.apps=S.apps.filter(a=>{if(a.exp<=S.gm){addLog('WARN',`业务申请「${a.name}」已过期，对方另寻机房`);ch=true;return false;}return true;});
+  if(ch)S.dirty=true;
+
+  // 满意度（按性格分化）+ 客户来信
+  for(const c of [...S.clients]){
+    const sd={good:.5,normal:1,picky:1.6,lazy:1.2}[c.trait]||1;
+    const sr={good:.5,normal:.35,picky:.2,lazy:.15}[c.trait]||.35;
+    if(c.status!=='online'){c.sat=clamp(c.sat-1.6*sd,0,100);c.downMin+=TICK_MIN;}
+    else{
+      let d=sr;
+      if(cpuLoad>98||bwLoad>100)d-=1.5*sd;else if(cpuLoad>88||bwLoad>92)d-=.45*sd;
+      c.sat=clamp(c.sat+d,0,100);
+    }
+    const lowT=c.trait==='picky'?62:50;
+    if(c.sat<lowT&&!c.mailLow){c.mailLow=true;
+      const issue=pick(COMPLAINTS);
+      sendMail({from:`ops@client-${c.id}.cn`,fromName:c.name,subject:`【工单 #${ri(10000,99999)}】${issue}`,
+        body:`你好，我们${pick(['的网站最近偶尔打不开','的接口响应明显变慢','的数据库查询经常超时','的站点晚高峰频繁 502','的后台上传老是失败'])}，麻烦尽快排查一下，谢谢。`,
+        cat:'client',act:'apologize',cid:c.id});}
+    if(c.sat>=lowT+12)c.mailLow=false;
+    if(c.sat>88&&!c.mailHigh&&Math.random()<(c.trait==='good'?.02:.006)){c.mailHigh=true;
+      sendMail({from:`ops@client-${c.id}.cn`,fromName:c.name,subject:'感谢！最近服务很稳',
+        body:'这段时间运行很稳定，辛苦了。后续有扩容需求会优先找你们，也会推荐给同行朋友。',cat:'client'});
+      if(c.trait==='good'&&S.apps.length<5&&Math.random()<.7)genApp(true);}
+    if(c.sat<80)c.mailHigh=false;
+    if(c.sat<28&&Math.random()<.012)removeClient(c,'leave');
+  }
+
+  if(serverDown)S.downMin+=TICK_MIN;else S.upMin+=TICK_MIN;
+
+  const over=cpuLoad>100||bwLoad>100;
+  if(over&&!S.flags.overMail){S.flags.overMail=true;
+    sendMail({from:'monitor@serverops.cn',fromName:'ServerOps 监控中心',subject:'【告警】服务器负载超过 100%',
+      body:`当前 ${cpuLoad>100?`CPU 负载 ${Math.round(cpuLoad)}%`:`带宽负载 ${Math.round(bwLoad)}%`}，已超出承载能力，客户体验正在受损。<br><br>建议：升级硬件、开通突发带宽，或切换性能模式应急。`,cat:'sys'});}
+  if(!over&&cpuLoad<90&&bwLoad<90)S.flags.overMail=false;
+  if(S.money<0&&!S.flags.debt1){S.flags.debt1=true;
+    sendMail({from:'finance@idc-a12.cn',fromName:'IDC-A12 财务部',subject:'【欠费提醒】账户余额已为负',
+      body:'你的账户余额已低于 0，请及时充值，避免影响续费与征信。<br><br>负债超过 <b>¥3,000</b> 将被强制断电清退。',cat:'sys'});}
+  if(S.money>=500)S.flags.debt1=false;
+  if(S.money<-1500&&!S.flags.debt2){S.flags.debt2=true;
+    sendMail({from:'finance@idc-a12.cn',fromName:'IDC-A12 财务部',subject:'【催缴函】欠款已超 ¥1,500',
+      body:'郑重提醒：你的账户欠款已超过 ¥1,500。若 72 小时内未补足，将上报征信并限制扩容。',cat:'sys'});}
+  if(S.money>=-1000)S.flags.debt2=false;
+
+  if(S.rentHiked===0&&day>=60){S.rentHiked=1;S.rent=950;
+    addLog('WARN','机位租金上调至 ¥950/月');
+    sendMail({from:'finance@idc-a12.cn',fromName:'IDC-A12 财务部',subject:'【通知】机位租金调整至 ¥950/月',
+      body:'受电力与场地成本上涨影响，机柜 A-12 机位租金自下期账单起调整为 ¥950/月。',cat:'sys'});
+    openDialog({ic:'domain',title:'机位租金调整',html:'IDC 通知：受电力与场地成本上涨影响，机柜 A-12 机位租金上调至 <b>¥950/月</b>（下期账单生效）。',btns:[{t:'知道了',cls:'filled'}]});}
+  if(S.rentHiked===1&&day>=150){S.rentHiked=2;S.rent=1100;
+    addLog('WARN','机位租金上调至 ¥1100/月');
+    sendMail({from:'finance@idc-a12.cn',fromName:'IDC-A12 财务部',subject:'【通知】机位租金调整至 ¥1100/月',
+      body:'机房完成电力增容改造，机位租金自下期账单起调整为 ¥1100/月。',cat:'sys'});
+    openDialog({ic:'domain',title:'机位租金调整',html:'IDC 通知：机房完成电力增容改造，机位租金上调至 <b>¥1100/月</b>（下期账单生效）。',btns:[{t:'知道了',cls:'filled'}]});}
+
+  while(dayNum()>=S.nextSettle&&!S.over)doSettle();
+  if(S.money<-3000&&!S.over){S.over=true;gameOver();}
+}
+
+function doSettle(){
+  S.nextSettle+=30;S.settled++;
+  let inc=0,comp=0;
+  for(const c of S.clients){
+    const f=c.sat>=75?1:c.sat>=50?.8:.55;
+    const days=Math.min(30,(S.gm-c.joined)/1440);
+    const due=Math.round(c.pay*f*(days>=30?1:Math.max(.15,days/30)));
+    const slaC=1-c.downMin/43200;
+    if(slaC<0.99)comp+=Math.round(c.pay*.25);
+    else if(slaC<0.999)comp+=Math.round(c.pay*.1);
+    c.downMin=0;
+    if(c.trait==='lazy'&&due>0&&Math.random()<.35){
+      const paid=Math.round(due*.5);inc+=paid;c.arrears=(c.arrears||0)+(due-paid);
+      addLog('WARN',`「${c.name}」拖欠账单 ¥${fmt(due-paid)}`);
+      sendMail({from:'finance@idc-a12.cn',fromName:'IDC-A12 财务部',subject:`【对账】${c.name} 本月款项部分未付`,
+        body:`财务对账发现：「${c.name}」本期应付 <b>¥${fmt(due)}</b>，实付 ¥${fmt(paid)}，尚欠 <b>¥${fmt(c.arrears)}</b>。<br><br>对方财务电话无人接听，可发送正式催款函。`,cat:'sys',act:'dun',cid:c.id});
+    }else inc+=due;
+    if(c.trait==='good'&&Math.random()<.2&&S.apps.length<5)genApp(true);
+    c.cpu=Math.round(c.cpu*rnd(1.02,1.08));
+    c.bw=+(c.bw*rnd(1.02,1.08)).toFixed(1);
+    if(Math.random()<.6)c.pay=Math.round(c.pay*rnd(1.0,1.04));
+  }
+  if(S.clients.length)addLog('INFO','客户业务自然增长，资源需求已上调');
+  const kwh=Math.round(S.kwh),elec=Math.round(S.elecCost);
+  S.kwh=0;S.elecCost=0;
+  const o=monthlyOut(),out=elec+o.rent+o.bw+o.svc;
+  const net=inc-comp-out;
+  S.money+=net;S.totalIn+=inc;S.totalOut+=out+comp;
+  const svcRows=Object.entries(SVCS).filter(([k,v])=>v.mfee&&S.hw[k]).map(([k,v])=>`<div class="brow"><span>${v.n}</span><b class="neg">-${fmt(v.mfee)}</b></div>`).join('');
+  addLog(net>=0?'OK':'ERROR',`第 ${S.settled} 期结算：收入 ¥${fmt(inc)}，支出 ¥${fmt(out+comp)}，净额 ${net>=0?'+':''}¥${fmt(net)}`);
+  sendMail({from:'finance@idc-a12.cn',fromName:'IDC-A12 财务部',
+    subject:`【账单】第 ${S.settled} 期月度账单 · 净额 ${net>=0?'+':''}¥${fmt(net)}`,
+    body:`本期收入 <b>¥${fmt(inc)}</b>，支出 <b>¥${fmt(out+comp)}</b>，净额 <b>${net>=0?'+':''}¥${fmt(net)}</b>。<br><br>电子发票（普通发票）已开具，编号 INV-${S.settled}${ri(1000,9999)}，可在财务中心下载。`,cat:'sys'});
+  openDialog({ic:net>=0?'receipt_long':'warning',title:`第 ${S.settled} 期月度账单`,
+    html:`<div class="bill">
+      <div class="brow"><span>托管收入（${S.clients.length} 家客户）</span><b class="pos">+${fmt(inc)}</b></div>
+      ${comp?`<div class="brow"><span>SLA 未达标赔付（&lt;99.9%）</span><b class="neg">-${fmt(comp)}</b></div>`:''}
+      <div class="brow"><span>电费 ${fmt(kwh)} kWh（峰谷均价 ¥${kwh?(elec/kwh).toFixed(2):'0'}）</span><b class="neg">-${fmt(elec)}</b></div>
+      <div class="brow"><span>机位租金（1U · 机柜 A-12）</span><b class="neg">-${fmt(o.rent)}</b></div>
+      <div class="brow"><span>带宽月租 ${bwCap()}Mbps 独享</span><b class="neg">-${fmt(o.bw)}</b></div>
+      ${svcRows}
+      <div class="brow total"><span>本期净额</span><b class="${net>=0?'pos':'neg'}">${net>=0?'+':''}¥${fmt(net)}</b></div>
+    </div>`,
+    btns:[{t:'确认入账',cls:'filled'}]});
+  checkLevel();save();
+}
+function gameOver(){
+  openDialog({ic:'sentiment_very_dissatisfied',title:'破产清算',
+    html:`负债超过 ¥3,000，机房被 IDC 强制断电清退。<br><br><div class="bill">
+      <div class="brow"><span>运营天数</span><b>${dayNum()} 天</b></div>
+      <div class="brow"><span>累计签约客户</span><b>${S.totalSigned} 家</b></div>
+      <div class="brow"><span>累计收入</span><b>¥${fmt(S.totalIn)}</b></div>
+      <div class="brow"><span>安全事故</span><b>${S.incidents} 次</b></div></div>`,
+    btns:[{t:'重新开始',cls:'filled',f:resetGame}]});
+}
+function resetGame(){
+  try{localStorage.removeItem(KEY)}catch(e){}
+  const u=S.user;
+  S=freshState();
+  S.user={email:u.email,reg:true};
+  shownMoney=S.money;$('#term').innerHTML='';alertSig='';liveLogLen=0;
+  renderLists();renderMails();renderFast();
+  offerServer();
+}
+
+/* ================= 渲染（差异化，避免动画重播） ================= */
+function setGauge(key,pct,val,sub){
+  const b=$('#g-'+key+'-b');
+  b.style.width=clamp(pct,0,100)+'%';
+  b.classList.toggle('warn',pct>85&&pct<=100);b.classList.toggle('err',pct>100);
+  const v=$('#g-'+key+'-v');if(v.textContent!==val)v.textContent=val;
+  const s=$('#g-'+key+'-s');if(s.textContent!==sub)s.textContent=sub;
+}
+function statusNow(){
+  if(!S.started)return{t:'未开通',c:'warn'};
+  if(S.over)return{t:'已破产',c:'err'};
+  if(S.repairing)return{t:S.repairing.phase==='pay'?'宕机 · 待维修':'维修中',c:'err'};
+  if(S.pendingUp)return{t:'硬件安装中',c:'warn'};
+  if(S.rebooting>0)return{t:'重启中…',c:'warn'};
+  if(S.thermal)return{t:'过热保护',c:'err'};
+  if(S.ddos)return{t:'遭受攻击',c:'err'};
+  if(S.m.cpuLoad>100||S.m.bwLoad>100)return{t:'过载运行',c:'warn'};
+  if(S.speed===0)return{t:'已暂停',c:'warn'};
+  return{t:'运行中',c:'ok'};
+}
+function renderAlerts(){
+  const a=[],m=S.m;
+  if(S.speed===0)a.push(['info','已暂停','pause']);
+  if(S.repairing)a.push(['err',S.repairing.phase==='pay'?`故障待维修 · ¥${fmt(S.repairing.cost)}`:'工程师维修中…','build']);
+  if(S.pendingUp)a.push(['info',`硬件安装中：${S.pendingUp.name}`,'engineering']);
+  if(S.thermal)a.push(['err','温度过高 · 算力受限','local_fire_department']);
+  if(S.ddos)a.push(['err',`DDoS 攻击中 +${S.ddos.mag}Mbps`,'gpp_maybe']);
+  if(S.fiberCut)a.push(['err','上游光缆故障 · 带宽仅剩 20%','lan']);
+  if(S.acDown)a.push(['warn','机房空调故障 · 环境 34°C','hvac']);
+  if(S.heatwave)a.push(['warn','高温热浪 · 环境 +5°C','wb_sunny']);
+  if(S.vuln)a.push(['warn','有漏洞待修补','bug_report']);
+  if(S.vulnRisk)a.push(['warn','漏洞未修复 · 入侵风险','gpp_maybe']);
+  if(m.ramU>ramCap())a.push(['err',`内存超售 ×${(m.ramU/ramCap()).toFixed(1)}`,'memory']);
+  if(m.diskPct>85)a.push(['warn',`磁盘使用 ${Math.round(m.diskPct)}%`,'hard_drive']);
+  if(m.cpuLoad>95)a.push(['warn',`CPU 负载 ${Math.round(m.cpuLoad)}%`,'memory_alt']);
+  if(S.watts>psuW())a.push(['err',`电源过载 ${S.watts}W/${psuW()}W`,'power']);
+  if(S.money<0)a.push(['err','负债经营中','trending_down']);
+  if(S.burst)a.push(['info',`突发带宽 ×2 · 剩 ${Math.max(1,Math.ceil((S.burst.until-S.gm)/60))}h`,'speed']);
+  if(S.sale)a.push(['info',`硬件促销 7 折 · 剩 ${Math.max(1,Math.ceil((S.sale.until-S.gm)/60))}h`,'sell']);
+  if(couponOn())a.push(['info','硬件代金券 ¥500 未使用','confirmation_number']);
+  if(S.priceHike)a.push(['warn',`电价上浮 15% · 剩 ${Math.max(1,Math.ceil((S.priceHike.until-S.gm)/1440))} 天`,'currency_yuan']);
+  if(S.maint&&!S.maint.done)a.push(['info',`计划维护 · ${Math.max(1,Math.ceil((S.maint.at-S.gm)/60))} 小时后`,'engineering']);
+  if(isSpringFest())a.push(['info','春节假期 · 流量模式切换','celebration']);
+  if(S.fest)a.push(['info','大促流量高峰进行中','local_mall']);
+  for(const p of ['cpu','ram','disk'])if(S.hw.health[p]<40)a.push(['warn',`${PN[p]}健康度 ${Math.round(S.hw.health[p])}%`,'monitor_heart']);
+  const sig=a.map(x=>x[0]+':'+x[1]).join('|');
+  if(sig===alertSig)return;
+  alertSig=sig;
+  $('#alerts').innerHTML=a.map(x=>`<span class="achip ${x[0]}"><span class="msr">${x[2]}</span>${x[1]}</span>`).join('');
+}
+function syncLiveLog(){
+  if(S.log.length===liveLogLen)return;
+  const box=$('#live-log');
+  if(S.log.length<liveLogLen){
+    box.innerHTML=S.log.slice(-4).map(e=>logLineHTML(e,false)).join('')||'<div class="tl l-info">暂无日志</div>';
+  }else{
+    const start=Math.max(liveLogLen,S.log.length-4);
+    for(let i=start;i<S.log.length;i++)box.insertAdjacentHTML('beforeend',logLineHTML(S.log[i],true));
+    while(box.children.length>4)box.firstChild.remove();
+  }
+  liveLogLen=S.log.length;
+}
+function renderFast(){
+  shownMoney+=(S.money-shownMoney)*.25;
+  if(Math.abs(S.money-shownMoney)<1)shownMoney=S.money;
+  const mEl=$('#money'),mTxt=(shownMoney<0?'-¥':'¥')+fmt(Math.abs(shownMoney));
+  if(mEl.textContent!==mTxt)mEl.textContent=mTxt;
+  mEl.classList.toggle('neg',S.money<0);
+  $('#rep-v').textContent=Math.round(S.rep);
+  $('#date-v').textContent=dateStr();
+  $('#day-v').textContent='第 '+dayNum()+' 天';
+  const li=levelInfo(),lvTxt=`Lv.${li.lv+1} · ${li.name}`;
+  if($('#tb-lv').textContent!==lvTxt)$('#tb-lv').textContent=lvTxt;
+  const em=$('#tb-mail');if(em.textContent!==(S.user.email||'未注册'))em.textContent=S.user.email||'未注册';
+  $('#nostart').hidden=S.started;
+
+  const m=S.m;
+  setGauge('cpu',m.cpuLoad,Math.round(m.cpuLoad)+'%',`${fmt(m.cpuD)} / ${fmt(cpuCap())} 算力`);
+  setGauge('ram',m.ramU/ramCap()*100,Math.round(m.ramU/ramCap()*100)+'%',`${fmt1(m.ramU)} / ${ramCap()} GB`);
+  setGauge('bw',m.bwLoad,Math.round(m.bwLoad)+'%',`${fmt1(m.bwD)} / ${fmt(m.bwCap)} Mbps`);
+  setGauge('disk',m.diskPct,Math.round(m.diskPct)+'%',`${fmt(m.diskUsed)} / ${fmt(diskCap())} GB`);
+
+  const t=Math.round(S.temp),tTxt=String(t);
+  if($('#temp-v').textContent!==tTxt)$('#temp-v').textContent=tTxt;
+  const tb=$('#temp-box'),tcls=t>=82?'err':t>=65?'warn':'ok';
+  if(tb.dataset.c!==tcls){tb.dataset.c=tcls;tb.className='temp-ring '+tcls;}
+  const st=statusNow(),se=$('#srv-status');
+  if(se.dataset.c!==st.c){se.dataset.c=st.c;se.className='status-name '+st.c;}
+  if(se.textContent!==st.t)se.textContent=st.t;
+  $('#uptime-v').textContent=`已运行 ${Math.floor(S.upMin/1440)} 天 ${Math.floor(S.upMin%1440/60)} 小时 · SLA ${sla()}%`;
+  renderAlerts();
+
+  const inc=S.clients.reduce((s,c)=>s+c.pay,0),o=monthlyOut();
+  const out=Math.round(S.elecCost)+o.rent+o.bw+o.svc;
+  $('#fin-in').textContent='+¥'+fmt(inc);
+  $('#fin-out').textContent='-¥'+fmt(out);
+  $('#fin-out-l').textContent=`预估支出（含租金 ¥${fmt(o.rent)}）`;
+  const net=inc-out,fn=$('#fin-net');
+  fn.textContent=(net>=0?'+¥':'-¥')+fmt(Math.abs(net));
+  fn.className=net>=0?'pos':'neg';
+  $('#fin-elec').textContent=`电费 ¥${fmt(S.elecCost)} · 带宽 ¥${fmt(o.bw)}`;
+  $('#fin-days').textContent=`距结算 ${Math.max(0,S.nextSettle-dayNum())} 天`;
+  $('#logsize-v').textContent=fmt1(S.logsGB)+'G';
+  syncLiveLog();
+}
+function renderApps(){
+  $('#apps-count').textContent=S.apps.length?`${S.apps.length} 份待处理`:'';
+  const el=$('#apps');
+  if(!S.apps.length){el.innerHTML='<div class="empty sm">暂无新申请 —— 口碑越高、投放广告后申请越多</div>';return;}
+  el.innerHTML=S.apps.map(a=>{
+    const t=TYPES[a.type],hrs=Math.max(1,Math.ceil((a.exp-S.gm)/60));
+    const overR=ramUsedNow()+a.ram>ramCap(),overB=bwUsedNow()+a.bw>bwCap();
+    const ccls=a.credit>=80?'cr-0':a.credit>=60?'cr-1':a.credit>=45?'cr-2':'cr-3';
+    return`<div class="card outlined"${a.vip?' style="border-color:var(--primary)"':''}>
+      <div class="c-head"><span class="msr c-ic f">${t.ic}</span>
+        <div class="c-name"><b>${a.name}${a.vip?'<span class="vipchip">大客户</span>':''}${a.ref?'<span class="refchip">转介绍</span>':''}</b><span class="c-type">${t.n}${t.beian?(a.beian?' · 已备案':' · <i class="wt">未备案</i>'):''}</span></div>
+        <span class="exp">⏳ ${hrs}h</span></div>
+      <div class="rchips"><span class="rchip ${ccls}">信用 ${a.credit}</span><span class="rchip">CPU ${a.cpu}</span><span class="rchip">内存 ${a.ram}G</span><span class="rchip">硬盘 ${a.disk}G</span><span class="rchip">带宽 ${a.bw}M</span></div>
+      ${(overR||overB)?`<div class="fit-warn">⚠ 接入后${overR?'内存':''}${overR&&overB?'、':''}${overB?'带宽':''}将超限</div>`:''}
+      <div class="app-foot"><span class="pay">¥${a.pay}<i>/月</i></span>
+        <span class="sp"><button class="tbtn text ripple" data-act="app-reject" data-id="${a.id}">拒绝</button>
+        <button class="tbtn tonal ripple" data-act="app-accept" data-id="${a.id}">签约接入</button></span></div></div>`;
+  }).join('');
+}
+function renderClients(){
+  $('#client-count').textContent=`${S.clients.length} 家 · 月入 ¥${fmt(S.clients.reduce((s,c)=>s+c.pay,0))}`;
+  $('#clients-empty').hidden=S.clients.length>0;
+  $('#clients').innerHTML=S.clients.map(c=>{
+    const t=TYPES[c.type];
+    const stTxt={online:'运行中',down:'服务器离线',crashed:'进程崩溃',restarting:'重启中',beian:'备案暂停'}[c.status];
+    const stc=c.status==='online'?'ok':(c.status==='restarting'||c.status==='beian')?'warn':'err';
+    const trc={good:'<span class="tr-good">优质</span>',picky:'<span class="tr-picky">挑剔</span>',lazy:'<span class="tr-lazy">高风险</span>'}[c.trait]||'';
+    return`<div class="card outlined">
+      <div class="c-head"><span class="msr c-ic f">${t.ic}</span>
+        <div class="c-name"><b>${c.name}${trc}</b><span class="c-type">${t.n}${t.beian&&!c.beian?' · <i class="wt">未备案</i>':''}</span></div>
+        <span class="dot ${stc}"></span></div>
+      <div class="c-meta"><span class="pay">¥${c.pay}<i>/月</i></span><span class="st-${stc}">${stTxt}</span>${c.arrears>0?`<span class="st-err">拖欠 ¥${fmt(c.arrears)}</span>`:''}<span class="sat-t">满意度 ${Math.round(c.sat)}%</span></div>
+      <div class="sat"><div class="sat-bar ${c.sat<40?'low':c.sat<70?'mid':''}" style="width:${c.sat}%"></div></div>
+      <div class="c-acts">
+        <button class="tbtn text ripple" data-act="c-restart" data-id="${c.id}"><span class="msr bt">restart_alt</span>重启</button>
+        <button class="tbtn text ripple" data-act="c-nego" data-id="${c.id}"><span class="msr bt">handshake</span>涨价谈判</button>
+        ${c.arrears>0?`<button class="tbtn text ripple danger" data-act="c-dun" data-id="${c.id}"><span class="msr bt">outgoing_mail</span>催款</button>`:''}
+        <button class="tbtn text ripple danger" data-act="c-end" data-id="${c.id}"><span class="msr bt">logout</span>终止</button>
+      </div></div>`;
+  }).join('');
+}
+function healthBar(v,part){
+  const cls=v<30?'err':v<60?'warn':'';
+  return`<div class="hb"><div class="hb-t"><span>健康度${part?` · <button class="tbtn text ripple" style="height:22px;padding:0 6px;font-size:11px" data-act="replace" data-part="${part}">更换 ¥${fmt(replaceCost(part))}</button>`:''}</span><b class="${cls}">${Math.round(v)}%</b></div>
+    <div class="hb-track"><div class="hb-bar ${cls}" style="width:${v}%"></div></div></div>`;
+}
+function hwCard(ic,title,spec,bar,info,cat){
+  const next=TIERS[cat][S.hw[cat]+1];
+  return`<div class="card outlined">
+    <div class="hw-h"><span class="msr hw-ic f">${ic}</span>
+      <div class="hw-t"><b>${title}</b><span>${spec}</span></div>
+      ${next?`<button class="tbtn tonal ripple sm" data-act="shop-cat" data-cat="${cat}">升级 ¥${fmt(tierPrice(cat,S.hw[cat]+1))}</button>`:'<span class="maxchip">满配</span>'}</div>
+    ${bar||''}<div class="hw-info">${info}</div></div>`;
+}
+function renderHW(){
+  const cpu=cpuT(),ram=TIERS.ram[S.hw.ram],disk=TIERS.disk[S.hw.disk],bw=TIERS.bw[S.hw.bw],
+        psu=TIERS.psu[S.hw.psu],cool=TIERS.cool[S.hw.cool],h=S.hw.health,m=S.m;
+  let html='';
+  if(S.repairing){
+    html+=`<div class="card repair">
+      <div class="rp-h"><span class="msr f">engineering</span><b>${S.repairing.reason}</b></div>
+      <div class="rp-b">${S.repairing.phase==='pay'
+        ?`服务器宕机中，全部客户离线。需支付维修费 <b>¥${fmt(S.repairing.cost)}</b>（更换 ${PN[S.repairing.part]}）。`
+        :`工程师维修中，预计 ${Math.max(1,Math.ceil((S.repairing.until-S.gm)/6))}0 分钟内恢复。`}</div>
+      ${S.repairing.phase==='pay'?`<button class="tbtn filled ripple" data-act="repair">支付维修费 ¥${fmt(S.repairing.cost)}</button>`:''}</div>`;
+  }
+  if(S.pendingUp){
+    html+=`<div class="card work">
+      <div class="rp-h"><span class="msr f">engineering</span><b>硬件安装中：${S.pendingUp.name}</b></div>
+      <div class="rp-b">工程师现场施工，服务器停机，预计 ${Math.max(1,Math.ceil((S.pendingUp.until-S.gm)/6))}0 分钟后恢复上线。</div></div>`;
+  }
+  html+=hwCard('memory_alt','处理器',`${cpu.m} · ${cpu.c}核 ${cpu.f}GHz`,healthBar(h.cpu,'cpu'),
+    `可用算力 <b>${fmt(cpuCap())}</b>（性能模式 ×${perfCapF().toFixed(2)}）· 当前温度 <b>${Math.round(S.temp)}°C</b>${S.thermal?' · <span style="color:var(--error)">过热降频中</span>':''}`,'cpu');
+  html+=hwCard('memory','内存',ram.m,healthBar(h.ram,'ram'),
+    `已分配 <b>${fmt1(m.ramU)}G</b> / ${ram.g}G${m.ramU>ram.g?' · <span style="color:var(--error)">超售中，OOM 风险</span>':''}`,'ram');
+  html+=hwCard('hard_drive','存储',disk.m,healthBar(h.disk,'disk'),
+    `已用 <b>${fmt(m.diskUsed)}G</b> / ${fmt(disk.g)}G（含日志 ${fmt1(S.logsGB)}G）`,'disk');
+  html+=hwCard('lan','带宽',bw.m,null,
+    `实时 <b>${fmt1(m.bwD)}Mbps</b> / ${fmt(m.bwCap)}Mbps${S.fiberCut?' · <span style="color:var(--error)">光缆故障限流中</span>':''}${S.burst?' · <span style="color:var(--ok)">突发 ×2</span>':''} · 月租 <b>¥${fmt(Math.max(0,bw.v-10)*20)}</b>（含 10M）`,'bw');
+  html+=hwCard('bolt','供电',psu.m,null,
+    `实时功率 <b>${S.watts}W</b> / ${psu.w}W · 本期电费 <b>¥${fmt1(S.elecCost)}</b> · 当前电价 <b>¥${priceNow(hourOf()).toFixed(2)}</b>/kWh${S.priceHike?'（上浮中）':''}${S.watts>psu.w?' · <span style="color:var(--error)">过载！</span>':''}`,'psu');
+  html+=hwCard('ac_unit','散热',cool.m,null,`降温能力 <b>-${cool.off}°C</b> · 机房环境温度 <b>${26+(S.acDown?8:0)+(S.heatwave?5:0)}°C</b>${S.acDown?' · <span style="color:var(--warn)">空调故障</span>':''}${S.heatwave?' · <span style="color:var(--warn)">热浪</span>':''}`,'cool');
+  const addons=[['ups','UPS 不间断电源','市电异常时业务零感知'],['ddos','高防 IP','自动清洗 DDoS · ¥600/月'],
+    ['ops','驻场运维工程师','自动工单 · 维修提速 50%'],['autoR','进程守护','崩溃后自动拉起'],
+    ['rotate','日志轮转','日志增长 -65%'],['snap','自动快照','每日备份 · ¥100/月']];
+  html+=`<div class="card outlined"><div class="hw-h"><span class="msr hw-ic f">security</span>
+    <div class="hw-t"><b>增值服务</b><span>提升可用性与安全</span></div>
+    <button class="tbtn tonal ripple sm" data-act="shop">去采购</button></div>
+    <div style="margin-top:8px">${addons.map(a=>`<div class="addon"><span>${a[1]}<i>${a[2]}</i></span>${S.hw[a[0]]?'<span class="onchip">已启用</span>':''}</div>`).join('')}</div></div>`;
+  $('#hw-list').innerHTML=html;
+}
+function renderLists(){renderApps();renderClients();renderHW();}
+
+function switchPage(p){
+  curPage=p;
+  $$('.page').forEach(x=>x.classList.toggle('on',x.id==='page-'+p));
+  $$('.nav-it').forEach(x=>x.classList.toggle('on',x.dataset.page===p));
+  const pg=$('#page-'+p);
+  pg.classList.remove('enter');void pg.offsetWidth;pg.classList.add('enter');
+  setTimeout(()=>pg.classList.remove('enter'),520);
+  if(p==='logs')renderTerm();
+  if(p==='mails')renderMails();
+  window.scrollTo({top:0});
+  renderLists();
+}
+function syncSeg(){$$('#speed-seg button').forEach(b=>b.classList.toggle('on',+b.dataset.speed===S.speed));}
+function setSpeed(v){S.speed=v;syncSeg();}
+function syncPerf(){$$('#perf-seg button').forEach(b=>b.classList.toggle('on',+b.dataset.perf===S.hw.perf));}
+function setPerf(v){
+  if(S.hw.perf===v)return;
+  S.hw.perf=v;syncPerf();
+  addLog('INFO',`BIOS 性能模式切换为：${['节能','标准','性能'][v]}${v===2?'（算力 +15%，功耗与发热上升）':v===0?'（算力 -15%，更凉更省电）':''}`);
+}
+function applyTheme(){
+  const d=localStorage.getItem('sops-theme')==='1';
+  document.documentElement.classList.toggle('dark',d);
+  $('#theme-ic').textContent=d?'light_mode':'dark_mode';
+}
+function toggleTheme(){
+  const d=document.documentElement.classList.toggle('dark');
+  localStorage.setItem('sops-theme',d?'1':'0');
+  $('#theme-ic').textContent=d?'light_mode':'dark_mode';
+}
+function restartServer(){
+  if(S.repairing)return snack('服务器处于离线状态，需先维修','err');
+  if(S.pendingUp)return snack('硬件施工中，无法重启','err');
+  if(S.rebooting>0)return;
+  S.rebooting=2;S.thermal=false;
+  S.clients.forEach(c=>{if(c.status==='online')c.sat=clamp(c.sat-2,0,100)});
+  addLog('WARN','执行重启：shutdown -r now … 全部服务短暂中断约 20 分钟');
+  snack('服务器重启中…');
+}
+function cleanLog(){
+  S.logsGB=1.5;S.dirty=true;
+  addLog('INFO','logrotate：已清理 /var/log，释放空间');
+  snack('日志已清理','ok');renderLists();
+}
+function doBackup(){
+  if(S.money<50)return snack('余额不足','err');
+  S.money-=50;S.totalOut+=50;S.backupAt=S.gm;
+  addLog('OK','手动快照备份完成（7 天内有效）');snack('快照备份完成','ok');
+}
+function buyBurst(){
+  if(S.burst)return snack('突发带宽已生效中');
+  if(bwCap()>=1000)return snack('已是千兆端口，无需扩容');
+  if(S.money<300)return snack('余额不足','err');
+  S.money-=300;S.totalOut+=300;S.burst={until:S.gm+144};
+  addLog('OK','已开通带宽突发扩容：24 小时内端口带宽 ×2');
+  snack('突发带宽已生效 ×2','ok');
+}
+function settingsDialog(){
+  openDialog({ic:'settings',title:'系统',
+    html:`<div class="set-row">账号：<b>${S.user.email||'未注册'}</b><br>存档：第 <b>${dayNum()}</b> 天 · <b>${S.clients.length}</b> 家客户 · 资产 <b>¥${fmt(S.money)}</b><br>自动存档已开启（每 45 秒）。<br>重要通知会同步发送到你的邮箱。</div>`,
+    btns:[
+      {t:'重新开始',cls:'text',f:()=>openDialog({ic:'warning',title:'重新开始？',html:'当前经营数据将被清除（保留账号），回到采购第一台服务器之前。',
+        btns:[{t:'确认重开',cls:'filled',f:resetGame},{t:'取消',cls:'text'}]})},
+      {t:'关闭',cls:'filled'},
+    ]});
+}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act],[data-speed],[data-perf],[data-page]');
+  if(!el)return;
+  buzz(8);
+  if(el.dataset.speed!==undefined){setSpeed(+el.dataset.speed);return;}
+  if(el.dataset.perf!==undefined){setPerf(+el.dataset.perf);return;}
+  if(el.dataset.page){switchPage(el.dataset.page);return;}
+  switch(el.dataset.act){
+    case 'theme':toggleTheme();break;
+    case 'settings':settingsDialog();break;
+    case 'shop':openShop();break;
+    case 'shop-cat':openShop(el.dataset.cat);break;
+    case 'sheet-close':closeSheet();break;
+    case 'buy-server':offerServer();break;
+    case 'pw-eye':{
+      const pw=$('#reg-pw'),show=pw.type==='password';
+      pw.type=show?'text':'password';
+      $('#pw-ic').textContent=show?'visibility_off':'visibility';
+      break;}
+    case 'send-code':sendCode();break;
+    case 'reg-inbox':openSheetHtml('收件箱',mailsListHtml()||'<div class="empty sm">收件箱是空的，先发送验证码吧</div>');break;
+    case 'reg-submit':regSubmit();break;
+    case 'mail-open':openMailSheet(+el.dataset.id);break;
+    case 'mail-readall':S.mails.forEach(m=>m.read=true);renderMails();break;
+    case 'mail-filter':
+      mailFilter=el.dataset.f;
+      $$('[data-act="mail-filter"]').forEach(c=>c.classList.toggle('on',c===el));
+      renderMails();break;
+    case 'mail-del':
+      S.mails=S.mails.filter(m=>m.id!==+el.dataset.id);
+      closeSheet();renderMails();break;
+    case 'mail-shop':openShop();break;
+    case 'mail-coupon':{
+      const m=S.mails.find(x=>x.id===+el.dataset.id);
+      if(S.couponTaken){snack('你已经领过这张券了');break;}
+      S.couponTaken=true;if(m)m.acted=true;
+      addLog('OK','已领取 ¥500 硬件代金券（下次购买硬件自动抵扣）');
+      snack('🎫 代金券已到账，下次买硬件自动抵扣','ok');
+      closeSheet();renderMails();break;}
+    case 'mail-unsub':{
+      const m=S.mails.find(x=>x.id===+el.dataset.id);
+      if(m)m.acted=true;
+      snack('已退订（对方：收到，下次还发）');
+      closeSheet();renderMails();break;}
+    case 'mail-reply':{
+      const cid=+el.dataset.cid;
+      const m=S.mails.find(x=>x.act==='apologize'&&x.cid===cid&&!x.acted);
+      if(m)m.acted=true;
+      const c=S.clients.find(x=>x.id===cid);
+      if(c){c.sat=clamp(c.sat+5,0,100);addLog('OK',`已回复致歉并加急排查，「${c.name}」情绪缓和`);snack('已回复，客户情绪缓和','ok');}
+      closeSheet();renderLists();renderMails();break;}
+    case 'mail-dun':dunClient(+el.dataset.cid);closeSheet();break;
+    case 'app-accept':acceptApp(+el.dataset.id);break;
+    case 'app-reject':rejectApp(+el.dataset.id);break;
+    case 'c-restart':restartClient(+el.dataset.id);break;
+    case 'c-nego':negoClient(+el.dataset.id);break;
+    case 'c-dun':dunClient(+el.dataset.id);break;
+    case 'c-end':endClient(+el.dataset.id);break;
+    case 'restart-srv':restartServer();break;
+    case 'clean-log':cleanLog();break;
+    case 'backup':doBackup();break;
+    case 'burst':buyBurst();break;
+    case 'repair':repair();break;
+    case 'replace':replacePart(el.dataset.part);break;
+    case 'buy':buyItem(el.dataset.cat);break;
+    case 'buy-svc':buySvc(el.dataset.key);break;
+    case 'log-clear':S.log=[];liveLogLen=0;$('#live-log').innerHTML='';renderTerm();break;
+    case 'log-filter':
+      logFilter=el.dataset.f;
+      $$('[data-act="log-filter"]').forEach(c=>c.classList.toggle('on',c===el));
+      renderTerm();break;
+  }
+});
+document.addEventListener('pointerdown',e=>{
+  const el=e.target.closest('.ripple');if(!el)return;
+  const r=el.getBoundingClientRect(),d=Math.max(r.width,r.height)*2;
+  const s=document.createElement('span');s.className='rip';
+  s.style.width=s.style.height=d+'px';
+  s.style.left=(e.clientX-r.left-d/2)+'px';s.style.top=(e.clientY-r.top-d/2)+'px';
+  el.appendChild(s);setTimeout(()=>s.remove(),600);
+});
+window.addEventListener('keydown',e=>{
+  if(e.key===' '){e.preventDefault();setSpeed(S.speed===0?1:0);}
+  const map={'1':1,'2':2,'3':4,'4':8};
+  if(map[e.key]!==undefined)setSpeed(map[e.key]);
+});
+['reg-pre','reg-pw','reg-code'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')regSubmit();});
+});
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(KEY));
+    if(!d||d.v!==1||typeof d.money!=='number'||!d.hw||!Array.isArray(d.clients))return false;
+    if(d.money<-3000)return false;
+    const base=freshState();
+    S=Object.assign(base,d);
+    S.hw=Object.assign(base.hw,d.hw||{});
+    S.hw.health=Object.assign(base.hw.health,(d.hw||{}).health||{});
+    S.flags=Object.assign(base.flags,d.flags||{});
+    S.festDone=d.festDone||{};
+    if(!d.user||!d.user.reg){S.user={email:'boss@163.com',reg:true};S.started=true;}
+    if(!Array.isArray(S.mails))S.mails=[];
+    if(!S.mid)S.mid=1;
+    return true;
+  }catch(e){return false;}
+}
+setInterval(save,45000);
+window.addEventListener('beforeunload',save);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+
+let last=performance.now(),acc=0,rAcc=0,lAcc=0;
+function frame(t){
+  const dt=Math.min(t-last,250);last=t;
+  if(S.started&&S.speed>0){acc+=dt*S.speed;while(acc>=1000){acc-=1000;tick();}}
+  rAcc+=dt;if(rAcc>=200){rAcc=0;renderFast();}
+  lAcc+=dt;if(lAcc>=1600){lAcc=0;renderLists();}
+  requestAnimationFrame(frame);
+}
+
+const loaded=load();
+applyTheme();syncSeg();syncPerf();
+if(loaded)snack('已载入存档 · 继续运营','ok');
+shownMoney=S.money;
+renderLists();renderMails();renderFast();renderTerm();
+if(!S.user.reg)$('#reg').hidden=false;
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
