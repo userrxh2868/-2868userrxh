@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>自言文字编码</title>
+<style>
+  /* ========== 基础与变量（iOS 系统色板） ========== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  :root {
+    --bg: #F2F2F7;                       /* 分组背景 */
+    --card: #FFFFFF;                     /* 分组卡片 */
+    --text: #000000;                     /* 主文字 */
+    --text-2: rgba(60, 60, 67, .60);     /* 次级文字 */
+    --text-3: rgba(60, 60, 67, .30);     /* 三级文字 */
+    --sep: rgba(60, 60, 67, .18);        /* 发丝分隔线 */
+    --sep-strong: rgba(60, 60, 67, .24); /* 弹窗按钮分隔线 */
+    --menu-line: rgba(60, 60, 67, .14);  /* 菜单内发丝线 */
+    --fill: rgba(120, 120, 128, .16);    /* 分段底色 / 按压高亮 */
+    --accent: #007AFF;
+    --danger: #FF3B30;
+    --nav-bg: rgba(248, 248, 248, .84);
+    --nav-line: rgba(60, 60, 67, .20);
+    --seg-thumb: #FFFFFF;
+    --alert-bg: rgba(249, 249, 250, .88);
+    --toast-bg: rgba(29, 29, 31, .90);
+    --mono-font: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --card: #1C1C1E;
+      --text: #FFFFFF;
+      --text-2: rgba(235, 235, 245, .60);
+      --text-3: rgba(235, 235, 245, .30);
+      --sep: rgba(255, 255, 255, .12);
+      --sep-strong: rgba(255, 255, 255, .16);
+      --menu-line: rgba(255, 255, 255, .12);
+      --fill: rgba(120, 120, 128, .24);
+      --accent: #0A84FF;
+      --danger: #FF453A;
+      --nav-bg: rgba(28, 28, 30, .86);
+      --nav-line: rgba(255, 255, 255, .12);
+      --seg-thumb: #636366;
+      --alert-bg: rgba(50, 50, 54, .88);
+    }
+  }
+  [hidden] { display: none !important; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  button {
+    font: inherit;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  :where(button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ========== 导航栏（毛玻璃 + 发丝线） ========== */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding-top: env(safe-area-inset-top);
+    background: var(--nav-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: .5px solid var(--nav-line);
+  }
+  .nav-inner {
+    position: relative;
+    max-width: 480px;
+    margin: 0 auto;
+    height: 44px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-side { width: 40px; flex: none; }
+  .nav-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 62%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -.2px;
+  }
+  .nav-btn {
+    width: 40px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .nav-btn:active { opacity: .4; }
+  .nav-btn svg { width: 22px; height: 22px; }
+
+  /* ========== 页面骨架（手机宽度列） ========== */
+  .page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 14px 16px calc(44px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ========== 分组小标题 / 小注脚 ========== */
+  .sec-head {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-2);
+    letter-spacing: .2px;
+    padding: 0 16px;
+    margin-bottom: 7px;
+  }
+  .sec-foot {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.55;
+    text-align: center;
+    padding: 2px 28px 0;
+  }
+
+  /* ========== 分组卡片与行 ========== */
+  .card {
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  #resultSection, .card { scroll-margin-top: calc(env(safe-area-inset-top) + 56px); }
+
+  .preview-row {
+    border-top: 1px solid var(--sep);
+    padding: 10px 16px 11px;
+    font-family: var(--mono-font);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .input-foot {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 40px;
+    padding: 5px 16px;
+    border-top: 1px solid var(--sep);
+  }
+  .counter {
+    font-size: 12px;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ========== 分段控件（模式切换：编码 / 解码） ========== */
+  .segmented {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 32px;
+    padding: 2px;
+    background: var(--fill);
+    border-radius: 9px;
+  }
+  .seg-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: calc(50% - 2px);
+    height: calc(100% - 4px);
+    background: var(--seg-thumb);
+    border-radius: 7px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+    transition: transform .26s cubic-bezier(.3, .9, .35, 1);
+  }
+  .segmented[data-active="decode"] .seg-thumb { transform: translateX(100%); }
+  .seg-btn {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    border: 0;
+    background: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: color .2s;
+  }
+  .seg-btn.is-active { color: var(--text); }
+
+  /* ========== iOS 风格下拉（自绘，非原生 select） ========== */
+  /* 触发行：Settings 式「标签 …… 当前值 >」 */
+  .dropdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 46px;
+    padding: 7px 16px;
+    border: 0;
+    background: none;
+    color: var(--text);
+    font-size: 17px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .dropdown-row:active { background: var(--fill); }
+  .dd-value-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .dd-value { color: var(--accent); }
+  .dd-chevron {
+    width: 13px;
+    height: 13px;
+    color: var(--text-3);
+    transition: transform .28s cubic-bezier(.3, .9, .35, 1);
+  }
+  .dropdown-row[aria-expanded="true"] .dd-chevron { transform: rotate(180deg); }
+
+  /* 透明遮罩：仅用于捕获菜单外部的点击 / 触摸 */
+  .dropdown-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    background: transparent;
+  }
+
+  /* 菜单浮层：毛玻璃 + 圆角 + 指向箭头，从锚点缩放入场 */
+  .dropdown-menu {
+    position: fixed;
+    z-index: 150;
+    border-radius: 13px;
+    background: var(--alert-bg);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(180%);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .26), 0 2px 8px rgba(0, 0, 0, .10);
+    transform-origin: calc(100% - 26px) 0;
+    animation: menuIn .24s cubic-bezier(.32, .72, 0, 1);
+  }
+  .dropdown-menu.is-above { transform-origin: calc(100% - 26px) 100%; }
+  .dropdown-menu.closing {
+    opacity: 0;
+    transform: scale(.96);
+    transition: opacity .16s ease, transform .16s ease;
+  }
+  @keyframes menuIn { from { opacity: 0; transform: scale(.94); } }
+
+  /* 内层列表负责裁剪按压高亮，外层保持可见以容纳突出的箭头 */
+  .dd-list {
+    border-radius: 13px;
+    overflow: hidden;
+  }
+  .dd-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 0;
+    background: none;
+    color: var(--text);
+    font-size: 17px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .dd-item + .dd-item { border-top: .5px solid var(--menu-line); }
+  .dd-item:active { background: var(--fill); }
+  @media (hover: hover) {
+    .dd-item:hover { background: var(--fill); }
+  }
+  .dd-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .dd-check {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    color: var(--accent);
+    visibility: hidden;
+  }
+  .dd-item[aria-checked="true"] .dd-check { visibility: visible; }
+  .dd-check svg { width: 15px; height: 15px; }
+
+  /* 指向箭头：旋转 45° 的小方块，只描外侧两条边，
+   * 与菜单内侧重合的一半无边框，接缝不可见 */
+  .dd-arrow {
+    position: absolute;
+    top: -6.5px;
+    right: 20px;
+    width: 13px;
+    height: 13px;
+    background: var(--alert-bg);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(180%);
+    border-top: .5px solid var(--menu-line);
+    border-left: .5px solid var(--menu-line);
+    transform: rotate(45deg);
+  }
+  .dropdown-menu.is-above .dd-arrow {
+    top: auto;
+    bottom: -6.5px;
+    border-top: 0;
+    border-left: 0;
+    border-bottom: .5px solid var(--menu-line);
+    border-right: .5px solid var(--menu-line);
+  }
+
+  /* ========== 输入区 ========== */
+  .field { position: relative; }
+  .field textarea {
+    display: block;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    resize: none;
+    font: inherit;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--text);
+    caret-color: var(--accent);
+    min-height: 108px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 12px 16px 14px;
+  }
+  .field textarea::placeholder { color: var(--text-3); }
+  .field.mono textarea {
+    font-family: var(--mono-font);
+    font-size: 15px;
+    letter-spacing: .2px;
+  }
+  .field.has-text textarea { padding-right: 46px; }
+  .field-clear {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--fill);
+    color: var(--text-2);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .field-clear:active { opacity: .5; }
+  .field-clear svg { width: 11px; height: 11px; }
+
+  /* ========== 主按钮 ========== */
+  .primary-btn {
+    height: 50px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #FFF;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .12s, transform .12s;
+  }
+  .primary-btn:active { opacity: .75; transform: scale(.98); }
+  .primary-btn:disabled { opacity: .32; pointer-events: none; }
+  @media (hover: hover) {
+    .primary-btn:not(:disabled):hover { opacity: .9; }
+  }
+
+  /* ========== 结果区 ========== */
+  #styleSection:not([hidden]) { animation: sectionIn .3s cubic-bezier(.25, .9, .3, 1); }
+  #resultSection.reveal { animation: rise .34s cubic-bezier(.25, .9, .3, 1); }
+  @keyframes sectionIn { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+
+  .output {
+    padding: 13px 16px 15px;
+    font-size: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    max-height: min(320px, 44vh);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .output.mono {
+    font-family: var(--mono-font);
+    font-size: 15px;
+    letter-spacing: .2px;
+    word-break: break-all;
+  }
+  .result-actions {
+    display: flex;
+    border-top: 1px solid var(--sep);
+  }
+  .result-actions button {
+    flex: 1;
+    min-height: 46px;
+    border: 0;
+    background: none;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .result-actions button + button { border-left: 1px solid var(--sep); }
+  .result-actions button:active { background: var(--fill); }
+  @media (hover: hover) {
+    .result-actions button:hover { opacity: .72; }
+  }
+
+  /* ========== iOS 系统弹窗 ========== */
+  .alert-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 32px;
+    background: rgba(0, 0, 0, .38);
+    animation: alertFadeIn .2s ease;
+  }
+  .alert-overlay.closing { opacity: 0; transition: opacity .18s ease; }
+  .alert-sheet {
+    width: min(280px, 100%);
+    background: var(--alert-bg);
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+    border-radius: 14px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
+    animation: alertPop .3s cubic-bezier(.32, .72, 0, 1);
+    transition: transform .18s ease, opacity .18s ease;
+  }
+  .alert-overlay.closing .alert-sheet { transform: scale(.95); opacity: 0; }
+  @keyframes alertFadeIn { from { opacity: 0; } }
+  @keyframes alertPop { from { transform: scale(1.16); opacity: 0; } }
+  .alert-title {
+    padding: 20px 18px 0;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+  }
+  .alert-message {
+    padding: 10px 18px 20px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-2);
+    white-space: pre-line;
+  }
+  .alert-sheet.no-title .alert-message { padding-top: 20px; }
+  .alert-actions { display: flex; border-top: 1px solid var(--sep-strong); }
+  .alert-actions.is-stacked { flex-direction: column; }
+  .alert-btn {
+    flex: 1;
+    min-height: 46px;
+    padding: 8px 10px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .alert-btn + .alert-btn { border-left: 1px solid var(--sep-strong); }
+  .alert-actions.is-stacked .alert-btn + .alert-btn { border-left: 0; border-top: 1px solid var(--sep-strong); }
+  .alert-btn.is-cancel { font-weight: 600; }
+  .alert-btn.is-destructive { color: var(--danger); }
+  .alert-btn:active { background: var(--fill); }
+
+  /* ========== Toast（iOS HUD） ========== */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(28px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(14px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 82vw;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: var(--toast-bg);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s, transform .25s;
+    z-index: 99;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast::before {
+    content: '';
+    display: none;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    flex: none;
+  }
+  .toast.is-error::before { display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .seg-thumb, .toast, .alert-overlay, .alert-sheet,
+    #styleSection, #resultSection, .dropdown-menu, .dd-chevron { transition: none; animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-side" aria-hidden="true"></div>
+    <h1 class="nav-title">自言文字编码</h1>
+    <button class="nav-btn" id="aboutBtn" type="button" aria-label="关于本工具">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <circle cx="12" cy="12" r="9.1"/>
+        <path d="M12 11.2v5.6"/>
+        <circle cx="12" cy="7.5" r="1.15" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- 模式：编码 / 解码 -->
+  <div class="segmented" id="segmented" data-active="encode" role="tablist" aria-label="模式切换">
+    <div class="seg-thumb" aria-hidden="true"></div>
+    <button class="seg-btn is-active" role="tab" aria-selected="true"  data-mode="encode" type="button">编码</button>
+    <button class="seg-btn"           role="tab" aria-selected="false" data-mode="decode" type="button">解码</button>
+  </div>
+
+  <!-- 乱滚样式（仅编码时显示，自绘 iOS 风格下拉） -->
+  <section id="styleSection">
+    <p class="sec-head">乱滚样式</p>
+    <div class="card">
+      <button class="dropdown-row" id="styleRow" type="button" aria-haspopup="menu" aria-expanded="false">
+        <span class="dd-label">样式</span>
+        <span class="dd-value-wrap">
+          <span class="dd-value" id="styleValue">混搭</span>
+          <svg class="dd-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>
+        </span>
+      </button>
+      <p class="preview-row" id="stylePreview"></p>
+    </div>
+    <p class="sec-foot">解码时会自动识别样式</p>
+  </section>
+
+  <!-- 输入 -->
+  <section>
+    <p class="sec-head" id="inputLabel">原文</p>
+    <div class="card">
+      <div class="field" id="inputField">
+        <textarea id="inputArea" rows="4" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="sentences" aria-label="原文"></textarea>
+        <button class="field-clear" id="clearBtn" hidden type="button" aria-label="清空输入">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="input-foot">
+        <span class="counter" id="counter">0 字符</span>
+      </div>
+    </div>
+  </section>
+
+  <button class="primary-btn" id="actionBtn" type="button" disabled>开始乱滚编码</button>
+
+  <!-- 结果 -->
+  <section id="resultSection" hidden>
+    <p class="sec-head" id="resultTitle">乱滚结果</p>
+    <div class="card">
+      <div class="output mono" id="output" aria-live="polite"></div>
+      <div class="result-actions">
+        <button type="button" id="copyBtn">拷贝</button>
+        <button type="button" id="transferBtn">转去解码</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="sec-foot">自研编码格式 · 每次编码结果都不同<br>全程在本设备运行，文字不离开这里</p>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ==================================================================
+   * 编解码引擎 v3（纯逻辑，不碰 DOM）
+   *
+   * 设计原则：解码端绝不重放编码端的随机流。
+   *
+   * 统一帧结构：nonce(2) + 数据长度(3) + 校验和(4) 共 9 字节帧头，
+   * 之后接 UTF-8 数据，整帧按 16 字节一块分块，帧尾不足处用
+   * 随机字节填充（真实长度在帧头里，解码时填充被直接忽略——
+   * 这消除了“短文本补零 → 输出一串 aaaa”的统计破绽）。
+   *
+   * 三种样式共用同一个分块引擎，只有字母表不同：
+   *   混搭    base36（a-z + 0-9），每块 25 字符（36^25 > 2^128）
+   *   纯字母  base26（a-z），      每块 28 字符（26^28 > 2^128）
+   *   纯数字  base10（0-9），      每块 40 字符（10^40 > 2^128）
+   *
+   * 每块在进制转换前垫一个随机高位 h，使 T = h·2^128 + v 均匀铺满
+   * 整个字符空间（否则每块首字符只能落在狭窄区间，长串会暴露规律）。
+   * 解码时 v = T mod 2^128，h 被自动丢弃——无需任何密钥约定，
+   * 同时保证“同一句话每次编码结果都不同”。
+   *
+   * 混搭样式的伪装噪声采用“位置判定”：位置 i 是否为噪声，是
+   * hash(nonce, i) < 阈值 的纯函数（附“不连续、不落前 26 位”约束）。
+   * 编码端与解码端对同一位置各自独立计算，必然得出同一答案，
+   * 从结构上杜绝了“两端随机流错位一步、整串解码失败”这一类故障。
+   *
+   * 解码入口按字符构成自动路由候选格式（纯字母 / 纯数字 / 混搭），
+   * 由帧头校验和与严格 UTF-8 校验裁决；纯样式解码前会剔除全部
+   * 空白（可修复被硬换行复制坏的文本），混搭则折叠空白（它自身的
+   * 空格就是噪声的一部分）。
+   * ================================================================== */
+  const Codec = (() => {
+    const ALPHA26 = 'abcdefghijklmnopqrstuvwxyz';
+    const ALPHA36 = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const DIGIT10 = '0123456789';
+
+    const BLOCK_BYTES = 16;    // 每块字节数（128 bit）
+    const HEADER_BYTES = 9;    // nonce(2) + len(3) + checksum(4)
+    const MAX_DATA_BYTES = 1000000;
+    const MOD128 = 1n << 128n;
+
+    const MIX_CHARS = 25;      // 混搭：每块 25 个 base36 字符
+    const LETTER_CHARS = 28;   // 纯字母：每块 28 个 base26 字符
+    const DIGIT_CHARS = 40;    // 纯数字：每块 40 个 base10 字符
+
+    const NOISE_MIN_POS = 26;  // 前 25 位是首块（自举区），第 26 位起才允许噪声
+    const NOISE_THRESHOLD = 0.30;
+
+    const FMT = '这段文字无法解码：它可能不是本工具生成的乱码，或复制时被改动。';
+
+    class InputError extends Error {
+      constructor(msg) { super(msg); this.name = 'InputError'; }
+    }
+    class FormatError extends Error {
+      constructor(msg) { super(msg); this.name = 'FormatError'; }
+    }
+
+    const utf8encoder = new TextEncoder();
+    const utf8decoder = new TextDecoder('utf-8', { fatal: true });
+
+    /* ---- 随机源：优先 crypto（批量取池），回退 Math.random ---- */
+    const hasCrypto = typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function';
+    const pool = new Uint32Array(64);
+    let poolPos = pool.length;
+    function nextUint32() {
+      if (!hasCrypto) return (Math.random() * 4294967296) >>> 0;
+      if (poolPos >= pool.length) {
+        crypto.getRandomValues(pool);
+        poolPos = 0;
+      }
+      return pool[poolPos++];
+    }
+    /* 拒绝采样：保证 [0, nExclusive) 内严格均匀 */
+    function randInt(nExclusive) {
+      if (nExclusive <= 1) return 0;
+      const limit = 4294967296 - (4294967296 % nExclusive);
+      let x;
+      do { x = nextUint32(); } while (x >= limit);
+      return x % nExclusive;
+    }
+
+    /* ---- FNV-1a 32 位校验和（Math.imul 保证 32 位语义） ---- */
+    function fnv1a32(bytes) {
+      let h = 0x811C9DC5;
+      for (let i = 0; i < bytes.length; i++) {
+        h ^= bytes[i];
+        h = Math.imul(h, 0x01000193);
+      }
+      return h >>> 0;
+    }
+
+    /* ---- 帧构建：nonce + 长度 + 校验和 + 数据（均大端） ---- */
+    function buildFrame(data) {
+      const core = new Uint8Array(HEADER_BYTES + data.length);
+      const nonce = randInt(65536);
+      core[0] = (nonce >>> 8) & 0xFF;
+      core[1] = nonce & 0xFF;
+      core[2] = (data.length >>> 16) & 0xFF;
+      core[3] = (data.length >>> 8) & 0xFF;
+      core[4] = data.length & 0xFF;
+      const sum = fnv1a32(data);
+      core[5] = (sum >>> 24) & 0xFF;
+      core[6] = (sum >>> 16) & 0xFF;
+      core[7] = (sum >>> 8) & 0xFF;
+      core[8] = sum & 0xFF;
+      core.set(data, HEADER_BYTES);
+      return core;
+    }
+
+    /* 帧尾随机填充：填充长度由帧长决定（0..15），内容随机。
+     * 解码只依据帧头的真实长度取数据，填充字节永不参与校验。 */
+    function padFrameRandomly(core) {
+      const blocks = Math.ceil(core.length / BLOCK_BYTES);
+      const frame = new Uint8Array(blocks * BLOCK_BYTES);
+      frame.set(core);
+      for (let i = core.length; i < frame.length; i++) {
+        frame[i] = nextUint32() & 0xFF;
+      }
+      return frame;
+    }
+
+    /* ---- 帧校验：块数、长度、校验和、严格 UTF-8 四道关卡 ---- */
+    function parseFrame(frame) {
+      if (frame.length === 0 || frame.length % BLOCK_BYTES !== 0) throw new FormatError(FMT);
+      const blocks = frame.length / BLOCK_BYTES;
+      const len = (frame[2] << 16) | (frame[3] << 8) | frame[4];
+      if (len < 1 || len > MAX_DATA_BYTES) throw new FormatError(FMT);
+      const frameLen = HEADER_BYTES + len;
+      if (Math.ceil(frameLen / BLOCK_BYTES) !== blocks) throw new FormatError(FMT);
+      const data = frame.subarray(HEADER_BYTES, frameLen);
+      const expect = ((frame[5] << 24) | (frame[6] << 16) | (frame[7] << 8) | frame[8]) >>> 0;
+      if (fnv1a32(data) !== expect) throw new FormatError(FMT);
+      try {
+        return utf8decoder.decode(data);
+      } catch (_) {
+        throw new FormatError(FMT);
+      }
+    }
+
+    /* ---- 分块转换器：16 字节块 <-> C 个定长字符（含随机高位 h） ---- */
+    function makeConverter(alphabet, charsPerBlock) {
+      const C = charsPerBlock;
+      const BASE = BigInt(alphabet.length);
+      const P = BASE ** BigInt(C); // 恒大于 2^128
+      const digitOf = new Map();
+      for (let i = 0; i < alphabet.length; i++) digitOf.set(alphabet[i], i);
+
+      return {
+        C,
+
+        /* 块 -> C 个字符。h 的取值范围由数学保证：h·2^128 + v < base^C */
+        blockToChars(block) {
+          let v = 0n;
+          for (let i = 0; i < BLOCK_BYTES; i++) v = (v << 8n) | BigInt(block[i]);
+          const hMax = Number((P - 1n - v) / MOD128); // ≤ 29，Number 转换无损
+          let t = BigInt(randInt(hMax + 1)) * MOD128 + v;
+          const chars = new Array(C);
+          for (let i = C - 1; i >= 0; i--) {
+            chars[i] = alphabet[Number(t % BASE)];
+            t /= BASE;
+          }
+          return chars.join('');
+        },
+
+        /* C 个字符 -> 16 字节块。T mod 2^128 自动丢弃随机高位 h */
+        charsToBlock(str) {
+          let T = 0n;
+          for (let i = 0; i < C; i++) {
+            const d = digitOf.get(str[i]);
+            if (d === undefined) throw new FormatError(FMT);
+            T = T * BASE + BigInt(d);
+          }
+          let v = T % MOD128;
+          const out = new Uint8Array(BLOCK_BYTES);
+          for (let i = BLOCK_BYTES - 1; i >= 0; i--) {
+            out[i] = Number(v & 0xFFn);
+            v >>= 8n;
+          }
+          return out;
+        },
+      };
+    }
+
+    const MIXC = makeConverter(ALPHA36, MIX_CHARS);
+    const LETC = makeConverter(ALPHA26, LETTER_CHARS);
+    const DIGC = makeConverter(DIGIT10, DIGIT_CHARS);
+
+    function frameToPayload(frame, conv) {
+      const parts = [];
+      for (let off = 0; off < frame.length; off += BLOCK_BYTES) {
+        parts.push(conv.blockToChars(frame.subarray(off, off + BLOCK_BYTES)));
+      }
+      return parts.join('');
+    }
+
+    function prepare(text) {
+      const data = utf8encoder.encode(text);
+      if (data.length === 0) throw new InputError('请输入一些文字再编码');
+      if (data.length > MAX_DATA_BYTES) throw new InputError('文本太长了，请分段编码');
+      return data;
+    }
+
+    /* ---- 纯样式（纯字母 / 纯数字）：分块直出，无任何插入 ---- */
+    function encodePure(text, conv) {
+      const frame = padFrameRandomly(buildFrame(prepare(text)));
+      return frameToPayload(frame, conv);
+    }
+
+    function decodePure(s, conv) {
+      const C = conv.C;
+      if (s.length === 0 || s.length % C !== 0) throw new FormatError(FMT);
+      const blocks = s.length / C;
+      const frame = new Uint8Array(blocks * BLOCK_BYTES);
+      for (let b = 0; b < blocks; b++) {
+        frame.set(conv.charsToBlock(s.slice(b * C, (b + 1) * C)), b * BLOCK_BYTES);
+      }
+      return parseFrame(frame);
+    }
+
+    /* ---- 混搭样式的位置判定噪声 ----
+     * rawNoise(nonce, i) 是 的纯函数：编码端、解码端
+     * 对同一位置各自独立计算，结果必然一致，不存在需要两端
+     * “对表”的随机流状态。 */
+    function rawNoise(nonce, i) {
+      let h = (nonce ^ Math.imul(i + 1, 0x9E3779B1)) >>> 0;
+      h = Math.imul(h ^ (h >>> 16), 0x85EBCA6B);
+      h = Math.imul(h ^ (h >>> 13), 0xC2B2AE35);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    }
+
+    /* 噪声字符：字母为主、偶尔数字与空格，贴近乱滚键盘的观感 */
+    function noiseChar(nonce, i) {
+      let h = (nonce ^ Math.imul(i + 1, 0x85EBCA77)) >>> 0;
+      h = Math.imul(h ^ (h >>> 15), 0x2C1B3C6D);
+      h = Math.imul(h ^ (h >>> 12), 0x297A2D39);
+      h = Math.imul(h ^ (h >>> 15), 0x3BF72A9D);
+      const u = ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+      if (u < 0.14) return ' ';
+      if (u < 0.36) {
+        const d = Math.floor((u - 0.14) * (10 / 0.22));
+        return DIGIT10[d > 9 ? 9 : d];
+      }
+      const l = Math.floor((u - 0.36) * (26 / 0.64));
+      return ALPHA26[l > 25 ? 25 : l];
+    }
+
+    function encodeMix(text) {
+      const frame = padFrameRandomly(buildFrame(prepare(text)));
+      const payload = frameToPayload(frame, MIXC);
+      const nonce = (frame[0] << 8) | frame[1];
+
+      /* 逐位置输出：位置 i 满足（i ≥ 26 且上一位置非噪声 且
+       * rawNoise(nonce,i) < 阈值）时插入一个噪声字符，否则输出
+       * 下一个真实字符。噪声永不连续、永不落在首块自举区、
+       * 且输出恒以真实字符收尾（最后一个 payload 字符之后不再插入）。 */
+      const parts = [];
+      const n = payload.length;
+      let i = 0;
+      let j = 0;
+      let prevNoise = false;
+      while (j < n) {
+        if (i >= NOISE_MIN_POS && !prevNoise && rawNoise(nonce, i) < NOISE_THRESHOLD) {
+          parts.push(noiseChar(nonce, i));
+          prevNoise = true;
+        } else {
+          parts.push(payload[j]);
+          j++;
+          prevNoise = false;
+        }
+        i++;
+      }
+      return parts.join('');
+    }
+
+    function decodeMix(s) {
+      if (s.length < MIX_CHARS) throw new FormatError(FMT);
+
+      /* 1) 自举：前 25 个字符就是首块，从中读出 nonce / 长度 */
+      const block1 = MIXC.charsToBlock(s.slice(0, MIX_CHARS));
+      const nonce = (block1[0] << 8) | block1[1];
+      const len = (block1[2] << 16) | (block1[3] << 8) | block1[4];
+      if (len < 1 || len > MAX_DATA_BYTES) throw new FormatError(FMT);
+      const blocks = Math.ceil((HEADER_BYTES + len) / BLOCK_BYTES);
+      const payloadLen = blocks * MIX_CHARS;
+
+      /* 2) 用同一套位置判定规则剥离噪声（与编码端逐位一致） */
+      const parts = [];
+      let collected = 0;
+      let prevNoise = false;
+      let i = 0;
+      for (; i < s.length && collected < payloadLen; i++) {
+        if (i >= NOISE_MIN_POS && !prevNoise && rawNoise(nonce, i) < NOISE_THRESHOLD) {
+          prevNoise = true;
+        } else {
+          parts.push(s[i]);
+          collected++;
+          prevNoise = false;
+        }
+      }
+      if (collected !== payloadLen) throw new FormatError(FMT);
+
+      /* 3) 若还有剩余字符（正常输出不会有），必须全部判为噪声，
+       *    否则说明文本被拼接过额外内容，直接判非法 */
+      for (; i < s.length; i++) {
+        if (i >= NOISE_MIN_POS && !prevNoise && rawNoise(nonce, i) < NOISE_THRESHOLD) {
+          prevNoise = true;
+        } else {
+          throw new FormatError(FMT);
+        }
+      }
+
+      /* 4) 分块还原字节，交由帧校验 */
+      const payload = parts.join('');
+      const frame = new Uint8Array(blocks * BLOCK_BYTES);
+      for (let b = 0; b < blocks; b++) {
+        frame.set(
+          MIXC.charsToBlock(payload.slice(b * MIX_CHARS, (b + 1) * MIX_CHARS)),
+          b * BLOCK_BYTES
+        );
+      }
+      return parseFrame(frame);
+    }
+
+    /* ---- 对外入口 ---- */
+    function encode(text, style) {
+      if (style === 'letters') return encodePure(text, LETC);
+      if (style === 'digits') return encodePure(text, DIGC);
+      return encodeMix(text);
+    }
+
+    function decode(input) {
+      const raw = String(input);
+      /* 两种归一化：
+       * spaced    —— 所有空白折叠为单个空格并去首尾（混搭用，空格是其噪声的一部分）
+       * collapsed —— 剔除全部空白（纯样式用，可修复被硬换行复制坏的文本）
+       * 两者都做小写归一（修复 iOS 自动大写）。 */
+      const spaced = raw.replace(/\s+/g, ' ').trim().toLowerCase();
+      const collapsed = raw.replace(/\s+/g, '').toLowerCase();
+      if (!collapsed) throw new InputError('请先粘贴要解码的文字');
+      if (/[^a-z0-9 ]/.test(spaced)) throw new FormatError(FMT);
+
+      const hasL = /[a-z]/.test(collapsed);
+      const hasD = /[0-9]/.test(collapsed);
+
+      /* 候选格式按字符构成路由，依次尝试，由校验和裁决 */
+      const attempts = [];
+      if (hasL && !hasD && collapsed.length >= LETTER_CHARS && collapsed.length % LETTER_CHARS === 0) {
+        attempts.push(() => decodePure(collapsed, LETC));
+      }
+      if (hasD && !hasL && collapsed.length >= DIGIT_CHARS && collapsed.length % DIGIT_CHARS === 0) {
+        attempts.push(() => decodePure(collapsed, DIGC));
+      }
+      if (spaced.length >= MIX_CHARS) {
+        attempts.push(() => decodeMix(spaced));
+      }
+
+      for (const fn of attempts) {
+        try {
+          return fn();
+        } catch (_) {
+          /* 该格式不匹配，继续尝试下一种 */
+        }
+      }
+      throw new FormatError(FMT);
+    }
+
+    /* ---- 启动自检：三样式 × 多组用例的完整往返 + 篡改检测 ----
+     * 页面上不显示任何结果；全部通过时仅写一条 console 日志，
+     * 出现失败时由界面层弹出 iOS 风格错误弹窗。 */
+    function selfTest() {
+      const samples = [
+        'a', 'ab', 'z', 'hello world',
+        '你好，世界！', ' emoji 🎉🀄 test ',
+        'The quick brown fox jumps over the lazy dog. 0123456789 ~!@#',
+        'x'.repeat(7), 'x'.repeat(8), 'x'.repeat(15), 'x'.repeat(16),
+        'x'.repeat(17), 'x'.repeat(23), 'x'.repeat(24), 'x'.repeat(25),
+        'x'.repeat(39), 'x'.repeat(40), 'x'.repeat(41), 'x'.repeat(64),
+        '首行\n第二行\t带制表', '  前后空白  ',
+        '混合mix123文本'.repeat(20),
+      ];
+      const styles = ['mix', 'letters', 'digits'];
+      let total = 0;
+      let passed = 0;
+
+      for (const style of styles) {
+        for (const text of samples) {
+          total++;
+          try {
+            const enc = encode(text, style);
+            if (typeof enc === 'string' && enc.length > 0 && decode(enc) === text) passed++;
+          } catch (_) { /* 计为失败 */ }
+        }
+      }
+
+      /* 篡改检测：改动首块内一个字符（落在数据区，必触发校验失败） */
+      for (const style of styles) {
+        total++;
+        try {
+          const enc = encode('tamper-detect-校验', style);
+          const alphabet = style === 'digits' ? DIGIT10 : style === 'letters' ? ALPHA26 : ALPHA36;
+          const pos = 5;
+          const idx = alphabet.indexOf(enc[pos]);
+          const tampered = enc.slice(0, pos) + alphabet[(idx + 1) % alphabet.length] + enc.slice(pos + 1);
+          let threw = false;
+          try { decode(tampered); } catch (_) { threw = true; }
+          if (threw) passed++;
+        } catch (_) { /* 计为失败 */ }
+      }
+
+      return { total, passed };
+    }
+
+    return { encode, decode, selfTest, InputError, FormatError };
+  })();
+
+  /* ==================================================================
+   * iOS 风格系统弹窗（仅错误场景使用）
+   * 毛玻璃卡片、居中标题与正文、按钮行以发丝线分隔；
+   * 单按钮整行、双按钮等宽、三个及以上纵向堆叠。
+   * 支持键盘 Esc 关闭、Tab 循环聚焦、打开时锁定页面滚动、
+   * 关闭后焦点归还触发元素。仅通过按钮关闭（与系统行为一致）。
+   * ================================================================== */
+  const Alert = (() => {
+    let current = null;
+
+    function dismiss(action) {
+      const a = current;
+      if (!a || a.closing) return;
+      a.closing = true;
+      document.removeEventListener('keydown', a.onKey, true);
+      a.overlay.classList.add('closing');
+      window.setTimeout(() => { a.overlay.remove(); }, 200);
+      document.body.style.overflow = a.prevOverflow;
+      if (a.prevFocus && typeof a.prevFocus.focus === 'function') {
+        try { a.prevFocus.focus(); } catch (_) { /* 忽略 */ }
+      }
+      current = null;
+      if (typeof action === 'function') action();
+    }
+
+    function show(opts) {
+      /* 若已有弹窗，立即移除旧的再开新的 */
+      if (current) {
+        const old = current;
+        document.removeEventListener('keydown', old.onKey, true);
+        old.overlay.remove();
+        document.body.style.overflow = old.prevOverflow;
+        current = null;
+      }
+
+      const title = opts.title || '';
+      const message = opts.message || '';
+      const actions = (opts.actions && opts.actions.length)
+        ? opts.actions
+        : [{ label: '好' }];
+
+      const overlay = document.createElement('div');
+      overlay.className = 'alert-overlay';
+
+      const sheet = document.createElement('div');
+      sheet.className = 'alert-sheet' + (title ? '' : ' no-title');
+      sheet.setAttribute('role', 'alertdialog');
+      sheet.setAttribute('aria-modal', 'true');
+      if (title) sheet.setAttribute('aria-label', title);
+
+      if (title) {
+        const t = document.createElement('div');
+        t.className = 'alert-title';
+        t.textContent = title;
+        sheet.appendChild(t);
+      }
+      if (message) {
+        const m = document.createElement('div');
+        m.className = 'alert-message';
+        m.textContent = message;
+        sheet.appendChild(m);
+      }
+
+      const row = document.createElement('div');
+      row.className = 'alert-actions' + (actions.length > 2 ? ' is-stacked' : '');
+      const buttons = actions.map(act => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'alert-btn'
+          + (act.style === 'destructive' ? ' is-destructive' : '')
+          + (act.style === 'cancel' ? ' is-cancel' : '');
+        b.textContent = act.label;
+        b.addEventListener('click', () => dismiss(act.onClick));
+        row.appendChild(b);
+        return b;
+      });
+      sheet.appendChild(row);
+      overlay.appendChild(sheet);
+      document.body.appendChild(overlay);
+
+      const alert = {
+        overlay,
+        prevOverflow: document.body.style.overflow,
+        prevFocus: document.activeElement,
+        closing: false,
+        onKey: null,
+      };
+      alert.onKey = (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          buttons[buttons.length - 1].click();
+        } else if (e.key === 'Tab') {
+          e.preventDefault();
+          const idx = buttons.indexOf(document.activeElement);
+          const dir = e.shiftKey ? -1 : 1;
+          const next = buttons[(idx + dir + buttons.length) % buttons.length];
+          if (next) next.focus();
+        }
+      };
+      document.addEventListener('keydown', alert.onKey, true);
+      document.body.style.overflow = 'hidden';
+      current = alert;
+
+      /* 等入场动画走出第一帧再聚焦，避免焦点样式打断动画观感 */
+      window.setTimeout(() => {
+        if (current === alert) buttons[0].focus();
+      }, 60);
+    }
+
+    return { show };
+  })();
+
+  /* ==================================================================
+   * iOS 风格下拉菜单（自绘，不使用原生 <select>）
+   *
+   * - 触发行为 Settings 式「标签 …… 当前值 + 箭头」，展开后是
+   *   毛玻璃浮层菜单：13px 圆角、指向箭头、行间发丝线、
+   *   选中项右侧蓝色对勾，从箭头锚点缩放入场（iOS 菜单曲线）。
+   * - 优先在触发行下方展开，下方空间不足时自动翻转到上方，
+   *   箭头与缩放原点随之翻转。
+   * - 打开期间监听页面滚动（捕获）与窗口缩放，菜单位置
+   *   始终锚定触发行（rAF 节流重定位）。
+   * - 键盘完整可用：Esc 关闭、↑↓ 移动焦点、Enter/Space 选中、
+   *   Tab 在菜单项间循环；打开时自动聚焦当前选中项，
+   *   关闭后焦点归还触发行。
+   * - 无障碍：触发器 aria-haspopup / aria-expanded，
+   *   菜单 role="menu"，菜单项 role="menuitemradio" + aria-checked。
+   * ================================================================== */
+  const Dropdown = (() => {
+    const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>';
+    const VIEW_MARGIN = 8;    // 菜单与视口边缘的最小距离
+    const MIN_WIDTH = 220;    // 菜单最小宽度（桌面窄触发行时兜底）
+
+    let current = null;
+
+    function focusEl(el) {
+      /* preventScroll 避免程序化聚焦引发页面滚动；旧浏览器会忽略该参数 */
+      try { el.focus({ preventScroll: true }); } catch (_) { /* 忽略 */ }
+    }
+
+    /* 计算并应用菜单位置：宽度与触发行对齐，右对齐使箭头
+     * 正对触发行的箭头图标；上下方向按剩余空间自动选择。 */
+    function position(st) {
+      const rect = st.trigger.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const width = Math.min(Math.max(rect.width, MIN_WIDTH), vw - VIEW_MARGIN * 2);
+      st.menu.style.width = width + 'px';
+      const h = st.menu.offsetHeight; /* transform 不影响布局，可直接测量 */
+      const spaceBelow = vh - rect.bottom - VIEW_MARGIN;
+      const spaceAbove = rect.top - VIEW_MARGIN;
+      const below = spaceBelow >= h || spaceBelow >= spaceAbove;
+      st.menu.classList.toggle('is-above', !below);
+      let top = below ? rect.bottom + VIEW_MARGIN : rect.top - VIEW_MARGIN - h;
+      let left = rect.right - width;
+      left = Math.min(Math.max(VIEW_MARGIN, left), vw - width - VIEW_MARGIN);
+      top = Math.min(Math.max(VIEW_MARGIN, top), Math.max(VIEW_MARGIN, vh - h - VIEW_MARGIN));
+      st.menu.style.top = top + 'px';
+      st.menu.style.left = left + 'px';
+    }
+
+    function close(refocus) {
+      const st = current;
+      if (!st) return;
+      current = null;
+      document.removeEventListener('keydown', st.onKey, true);
+      window.removeEventListener('scroll', st.onReposition, true);
+      window.removeEventListener('resize', st.onReposition);
+      if (st.raf) cancelAnimationFrame(st.raf);
+      st.trigger.setAttribute('aria-expanded', 'false');
+      st.menu.classList.add('closing');
+      window.setTimeout(() => {
+        st.overlay.remove();
+        st.menu.remove();
+      }, 170);
+      if (refocus) focusEl(st.trigger);
+    }
+
+    function open(trigger, config) {
+      /* 已有菜单打开：先关掉；若是同一触发行则视为切换，不再重开 */
+      if (current) {
+        const same = current.trigger === trigger;
+        close(false);
+        if (same) return;
+      }
+
+      /* 透明遮罩：捕获菜单外部的点击 / 触摸以关闭 */
+      const overlay = document.createElement('div');
+      overlay.className = 'dropdown-overlay';
+
+      const menu = document.createElement('div');
+      menu.className = 'dropdown-menu';
+      menu.setAttribute('role', 'menu');
+
+      const arrow = document.createElement('div');
+      arrow.className = 'dd-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      menu.appendChild(arrow);
+
+      /* 内层列表负责裁剪按压高亮（圆角），外层 overflow 保持
+       * 可见以容纳突出于边框之外的指向箭头 */
+      const list = document.createElement('div');
+      list.className = 'dd-list';
+
+      const entries = config.items.map(item => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'dd-item';
+        row.setAttribute('role', 'menuitemradio');
+        const checked = config.isSelected(item.value);
+        row.setAttribute('aria-checked', String(checked));
+        const label = document.createElement('span');
+        label.textContent = item.label;
+        const check = document.createElement('span');
+        check.className = 'dd-check';
+        check.innerHTML = CHECK_ICON;
+        row.append(label, check);
+        row.addEventListener('click', () => {
+          if (current) close(true);
+          config.onSelect(item.value);
+        });
+        list.appendChild(row);
+        return { row, value: item.value, checked };
+      });
+      menu.appendChild(list);
+      document.body.append(overlay, menu);
+
+      const st = {
+        trigger,
+        overlay,
+        menu,
+        entries,
+        raf: 0,
+        onKey: null,
+        onReposition: null,
+      };
+
+      /* 滚动 / 缩放时菜单位置始终跟随触发行（rAF 节流） */
+      st.onReposition = () => {
+        if (st.raf) return;
+        st.raf = requestAnimationFrame(() => {
+          st.raf = 0;
+          if (current === st) position(st);
+        });
+      };
+
+      st.onKey = (e) => {
+        const rows = st.entries.map(en => en.row);
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          close(true);
+        } else if (e.key === 'Tab') {
+          /* Tab 在菜单项之间循环，避免焦点逃逸到被遮罩的页面上 */
+          e.preventDefault();
+          const idx = rows.indexOf(document.activeElement);
+          const dir = e.shiftKey ? -1 : 1;
+          const next = rows[(idx + dir + rows.length) % rows.length];
+          if (next) focusEl(next);
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          const idx = rows.indexOf(document.activeElement);
+          const dir = e.key === 'ArrowDown' ? 1 : -1;
+          const next = rows[(idx + dir + rows.length) % rows.length];
+          if (next) focusEl(next);
+        }
+      };
+
+      overlay.addEventListener('click', () => close(false));
+      document.addEventListener('keydown', st.onKey, true);
+      window.addEventListener('scroll', st.onReposition, true);
+      window.addEventListener('resize', st.onReposition);
+
+      trigger.setAttribute('aria-expanded', 'true');
+      current = st;
+
+      /* 先定位再显示（首帧渲染前完成，不会闪烁） */
+      position(st);
+
+      /* 聚焦当前选中项，键盘用户可立即用方向键操作 */
+      window.setTimeout(() => {
+        if (current !== st) return;
+        const hit = st.entries.find(en => en.checked);
+        focusEl(hit ? hit.row : st.entries[0].row);
+      }, 60);
+    }
+
+    function attach(trigger, config) {
+      trigger.addEventListener('click', () => open(trigger, config));
+    }
+
+    return { attach };
+  })();
+
+  /* ==================================================================
+   * 界面交互
+   * ================================================================== */
+  const $ = id => document.getElementById(id);
+  const els = {
+    aboutBtn: $('aboutBtn'),
+    segmented: $('segmented'),
+    segBtns: Array.from(document.querySelectorAll('#segmented .seg-btn')),
+    styleSection: $('styleSection'),
+    styleRow: $('styleRow'),
+    styleValue: $('styleValue'),
+    stylePreview: $('stylePreview'),
+    inputLabel: $('inputLabel'),
+    inputField: $('inputField'),
+    inputArea: $('inputArea'),
+    counter: $('counter'),
+    clearBtn: $('clearBtn'),
+    actionBtn: $('actionBtn'),
+    resultSection: $('resultSection'),
+    resultTitle: $('resultTitle'),
+    output: $('output'),
+    copyBtn: $('copyBtn'),
+    transferBtn: $('transferBtn'),
+    toast: $('toast'),
+  };
+
+  const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const state = {
+    mode: 'encode',
+    style: 'mix',
+    resultText: '',
+    charset: 'abcdefghijklmnopqrstuvwxyz0123456789 ', // 落定动画的跳变字符集
+  };
+
+  /* 乱滚样式：名称、示例预览、跳变字符集、主按钮文案 */
+  const STYLE_INFO = {
+    mix: {
+      name: '混搭',
+      preview: 'kxjdjd kwiwkxh 5 jdjdjd skjxhjdh 8 wkkx…',
+    },
+    letters: {
+      name: '纯字母',
+      preview: 'idhdksjwnxuhdkwiwkxhixjdjdhdjdhbb…',
+    },
+    digits: {
+      name: '纯数字',
+      preview: '646431521846754813516424578463161…',
+    },
+  };
+  const CHARSET_BY_STYLE = {
+    mix: 'abcdefghijklmnopqrstuvwxyz0123456789 ',
+    letters: 'abcdefghijklmnopqrstuvwxyz',
+    digits: '0123456789',
+  };
+  const ACTION_BY_STYLE = {
+    mix: '开始乱滚编码',
+    letters: '滚成纯字母乱码',
+    digits: '滚成纯数字乱码',
+  };
+  const STYLE_KEY = 'zyy-style-v1';
+
+  const COPY = {
+    encode: {
+      inputLabel: '原文',
+      placeholder: '输入任何文字：中文、英文、Emoji 都可以…',
+    },
+    decode: {
+      inputLabel: '乱码',
+      placeholder: '粘贴那段乱滚键盘般的文字，样式会自动识别…',
+    },
+  };
+
+  /* ---------- 模式与样式 ---------- */
+  function updateActionLabel() {
+    els.actionBtn.textContent = state.mode === 'encode'
+      ? ACTION_BY_STYLE[state.style]
+      : '解码还原';
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    els.segmented.dataset.active = mode;
+    els.segBtns.forEach(btn => {
+      const on = btn.dataset.mode === mode;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', String(on));
+    });
+    const c = COPY[mode];
+    els.inputLabel.textContent = c.inputLabel;
+    els.inputArea.placeholder = c.placeholder;
+    els.inputArea.setAttribute('aria-label', c.inputLabel);
+    els.inputArea.setAttribute('autocapitalize', mode === 'decode' ? 'none' : 'sentences');
+    els.inputField.classList.toggle('mono', mode === 'decode');
+    els.styleSection.hidden = mode !== 'encode'; // 样式选择只在编码时出现
+    updateActionLabel();
+    els.resultSection.hidden = true;
+    els.resultSection.classList.remove('reveal');
+    state.resultText = '';
+  }
+
+  function setStyle(style) {
+    state.style = style;
+    els.styleValue.textContent = STYLE_INFO[style].name;
+    els.stylePreview.textContent = STYLE_INFO[style].preview;
+    updateActionLabel();
+    /* 切换样式后，旧结果卡的标注（“乱滚结果 · xx”）不再准确，收起结果区 */
+    els.resultSection.hidden = true;
+    els.resultSection.classList.remove('reveal');
+    state.resultText = '';
+    try { localStorage.setItem(STYLE_KEY, style); } catch (_) { /* 隐私模式等场景忽略 */ }
+  }
+
+  /* ---------- 输入区 ---------- */
+  function updateMeta() {
+    const v = els.inputArea.value;
+    const n = v.length === 0 ? 0 : (v.length <= 20000 ? [...v].length : v.length);
+    els.counter.textContent = n + ' 字符';
+    const hasText = v.length > 0;
+    els.clearBtn.hidden = !hasText;
+    els.inputField.classList.toggle('has-text', hasText);
+    updateActionState();
+  }
+
+  /* 主按钮禁用态：内容为空时不可点（原生 App 的常规做法） */
+  function updateActionState() {
+    els.actionBtn.disabled = !els.inputArea.value.trim();
+  }
+
+  function autoGrow() {
+    els.inputArea.style.height = 'auto';
+    els.inputArea.style.height = Math.min(els.inputArea.scrollHeight, 320) + 'px';
+  }
+
+  /* ---------- 结果渲染 ---------- */
+  /* 乱滚落定动画：每个字符先随机跳变，再按序定格（等宽字体保证零抖动）。
+   * 跳变字符集跟随当前样式：纯字母滚字母、纯数字滚数字。 */
+  function renderOutput(text) {
+    els.output.textContent = '';
+    if (reduceMotion || text.length > 400) {
+      els.output.textContent = text;
+      return;
+    }
+    const DUR = 340;
+    const STAGGER = Math.min(26, 1100 / text.length);
+    const items = [...text].map((ch, i) => {
+      const sp = document.createElement('span');
+      sp.textContent = ch;
+      els.output.appendChild(sp);
+      return { sp, ch, start: i * STAGGER };
+    });
+    const t0 = performance.now();
+    let frame = 0;
+    (function tick(now) {
+      let done = true;
+      for (const it of items) {
+        if (now - t0 < it.start + DUR) {
+          done = false;
+          if (frame % 2 === 0) {
+            it.sp.textContent = state.charset[(Math.random() * state.charset.length) | 0];
+          }
+        } else {
+          it.sp.textContent = it.ch;
+        }
+      }
+      frame++;
+      if (!done) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  function revealResult() {
+    els.resultSection.hidden = false;
+    els.resultSection.classList.remove('reveal');
+    void els.resultSection.offsetWidth; // 重新触发入场动画
+    els.resultSection.classList.add('reveal');
+  }
+
+  function showResult(text) {
+    els.resultTitle.textContent = state.mode === 'encode'
+      ? '乱滚结果 · ' + STYLE_INFO[state.style].name
+      : '还原原文';
+    els.transferBtn.textContent = state.mode === 'encode' ? '转去解码' : '转去编码';
+    /* 编码输出用等宽字体，解码还原的原文用系统字体 */
+    els.output.classList.toggle('mono', state.mode === 'encode');
+    revealResult();
+    renderOutput(text);
+    /* 等布局落定后再平滑滚动到结果（尊重“减弱动态效果”） */
+    requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        els.resultSection.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'nearest',
+        });
+      }, 60);
+    });
+  }
+
+  /* ---------- 主流程 ---------- */
+  function runAction() {
+    const raw = els.inputArea.value;
+    if (!raw.trim()) {
+      showToast('先输入一点文字吧', true);
+      return;
+    }
+    let result;
+    try {
+      result = state.mode === 'encode'
+        ? Codec.encode(raw, state.style)
+        : Codec.decode(raw);
+    } catch (err) {
+      if (err instanceof Codec.InputError) {
+        showToast(err.message, true);
+      } else {
+        /* 真正的错误走 iOS 风格弹窗 */
+        Alert.show({
+          title: state.mode === 'decode' ? '无法解码' : '编码失败',
+          message: (err && err.message) ? err.message : '出了点问题，请重试。',
+          actions: [{ label: '好' }],
+        });
+      }
+      return;
+    }
+    state.resultText = result;
+    state.charset = state.mode === 'encode'
+      ? CHARSET_BY_STYLE[state.style]
+      : CHARSET_BY_STYLE.mix;
+    showResult(result);
+  }
+
+  /* ==================================================================
+   * 拷贝：新旧浏览器双通道
+   *
+   * 新浏览器 —— 异步剪贴板 API（navigator.clipboard.writeText），
+   *             权限提示更友好、不依赖临时 DOM；
+   * 旧浏览器 —— execCommand('copy') 旧路径，并处理 iOS Safari 的
+   *             经典陷阱：
+   *             · 隐藏元素无法被选中：用 1px 透明 + fixed 定位，
+   *               绝不能 display:none / visibility:hidden；
+   *             · 聚焦缩放：临时输入框字号 ≥ 16px；
+   *             · 选区污染：拷贝前保存用户当前选区，结束后还原；
+   *             · 触发时机：必须在同一个用户手势的任务内执行。
+   *
+   * 两条通道之间自动降级：新 API 缺失、非安全上下文、权限被拒
+   * 等任何失败，都静默落入旧路径；两路径全部失败才报错。
+   * ================================================================== */
+  function legacyCopyText(text) {
+    /* execCommand 在极老或受限环境下可能不存在，先探测 */
+    if (typeof document.execCommand !== 'function') return false;
+
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', ''); /* iOS 上可避免唤出软键盘 */
+    ta.style.cssText = [
+      'position:fixed',
+      'top:0',
+      'left:0',
+      'width:1px',
+      'height:1px',
+      'padding:0',
+      'border:none',
+      'margin:0',
+      'outline:none',
+      'box-shadow:none',
+      'background:transparent',
+      'opacity:0',
+      'font-size:16px', /* ≥16px，避免 iOS 聚焦时页面缩放 */
+    ].join(';');
+
+    /* 保存用户当前选区，拷贝完成后还原 */
+    const sel = (typeof window.getSelection === 'function') ? window.getSelection() : null;
+    let savedRange = null;
+    if (sel && sel.rangeCount > 0) {
+      try { savedRange = sel.getRangeAt(0).cloneRange(); } catch (_) { savedRange = null; }
+    }
+
+    document.body.appendChild(ta);
+    let ok = false;
+    try {
+      ta.select();
+      /* setSelectionRange 覆盖整段文本，兼容 iOS 的选区行为 */
+      if (typeof ta.setSelectionRange === 'function') {
+        ta.setSelectionRange(0, text.length);
+      }
+      ok = document.execCommand('copy');
+    } catch (_) {
+      ok = false;
+    }
+    ta.remove();
+
+    if (savedRange && sel) {
+      try {
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      } catch (_) { /* 忽略还原失败 */ }
+    }
+    return !!ok;
+  }
+
+  async function copyText(text) {
+    /* 通道一：异步剪贴板 API（新浏览器）。任何失败都落入通道二。 */
+    const clip = (typeof navigator !== 'undefined') ? navigator.clipboard : null;
+    if (clip && typeof clip.writeText === 'function') {
+      try {
+        await clip.writeText(text);
+        return true;
+      } catch (_) {
+        /* 权限被拒 / 非安全上下文 / 文档失焦等：落入旧路径 */
+      }
+    }
+    /* 通道二：execCommand 旧路径（旧浏览器 / 新 API 不可用场景） */
+    return legacyCopyText(text);
+  }
+
+  /* ---------- Toast（iOS HUD，用于轻量反馈） ---------- */
+  let toastTimer = 0;
+  function showToast(msg, isError) {
+    els.toast.textContent = msg;
+    els.toast.classList.toggle('is-error', !!isError);
+    els.toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => els.toast.classList.remove('show'), 2200);
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  els.aboutBtn.addEventListener('click', () => {
+    Alert.show({
+      title: '关于「自言文字编码」',
+      message: '把文字变成一段像乱敲键盘的乱码，随时原样还原。\n提供三种乱滚样式：混搭、纯字母、纯数字，解码时会自动识别。\n每次编码结果都不同，全程在本设备本地运行，文字不会上传。',
+      actions: [{ label: '好' }],
+    });
+  });
+
+  els.segBtns.forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+
+  /* 乱滚样式下拉：三项 + 选中对勾，选择后即时生效并记忆 */
+  Dropdown.attach(els.styleRow, {
+    items: [
+      { value: 'mix',     label: STYLE_INFO.mix.name },
+      { value: 'letters', label: STYLE_INFO.letters.name },
+      { value: 'digits',  label: STYLE_INFO.digits.name },
+    ],
+    isSelected: value => value === state.style,
+    onSelect: value => setStyle(value),
+  });
+
+  els.inputArea.addEventListener('input', () => { updateMeta(); autoGrow(); });
+
+  els.clearBtn.addEventListener('click', () => {
+    els.inputArea.value = '';
+    updateMeta();
+    autoGrow();
+    els.inputArea.focus();
+  });
+
+  els.actionBtn.addEventListener('click', runAction);
+
+  els.inputArea.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      runAction();
+    }
+  });
+
+  els.copyBtn.addEventListener('click', async () => {
+    const ok = await copyText(state.resultText);
+    showToast(ok ? '已拷贝' : '拷贝失败，请长按结果手动拷贝', !ok);
+  });
+
+  els.transferBtn.addEventListener('click', () => {
+    els.inputArea.value = state.resultText;
+    updateMeta();
+    autoGrow();
+    setMode(state.mode === 'encode' ? 'decode' : 'encode');
+    runAction(); // 结果出现后会自动滚动到位
+  });
+
+  /* ---------- 初始化 ---------- */
+  let savedStyle = null;
+  try { savedStyle = localStorage.getItem(STYLE_KEY); } catch (_) { /* 忽略 */ }
+  if (savedStyle && STYLE_INFO[savedStyle]) state.style = savedStyle;
+  setStyle(state.style);
+  setMode('encode');
+  updateMeta();
+  autoGrow();
+
+  /* 引擎自检：静默运行；全部通过只在控制台记一条日志，
+   * 出现任何失败才弹出 iOS 风格错误弹窗提醒用户刷新。 */
+  window.setTimeout(() => {
+    try {
+      const t = Codec.selfTest();
+      if (t.passed === t.total) {
+        try { console.info('[自言文字编码] 引擎自检通过 ' + t.passed + '/' + t.total); } catch (_) { /* 忽略 */ }
+      } else {
+        Alert.show({
+          title: '引擎自检未通过',
+          message: '启动自检有 ' + (t.total - t.passed) + ' 项失败（' + t.passed + '/' + t.total + '），编解码结果可能不可靠。请刷新页面重试。',
+          actions: [{ label: '好' }],
+        });
+      }
+    } catch (_) {
+      Alert.show({
+        title: '引擎自检未能运行',
+        message: '页面初始化出现异常，请刷新页面重试。',
+        actions: [{ label: '好' }],
+      });
+    }
+  }, 350);
+})();
+</script>
+</body>
+</html>
