@@ -11,15 +11,15 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; }
   :root {
-    --bg: #F2F2F7;                       /* 分组背景 */
-    --card: #FFFFFF;                     /* 分组卡片 */
-    --text: #000000;                     /* 主文字 */
-    --text-2: rgba(60, 60, 67, .60);     /* 次级文字 */
-    --text-3: rgba(60, 60, 67, .30);     /* 三级文字 */
-    --sep: rgba(60, 60, 67, .18);        /* 发丝分隔线 */
+    --bg: #F2F2F7;            /* 分组背景 */
+    --card: #FFFFFF;          /* 分组卡片 */
+    --text: #000000;          /* 主文字 */
+    --text-2: rgba(60, 60, 67, .60);   /* 次级文字 */
+    --text-3: rgba(60, 60, 67, .30);   /* 三级文字 */
+    --sep: rgba(60, 60, 67, .18);      /* 发丝分隔线 */
     --sep-strong: rgba(60, 60, 67, .24); /* 弹窗按钮分隔线 */
-    --menu-line: rgba(60, 60, 67, .14);  /* 菜单内发丝线 */
-    --fill: rgba(120, 120, 128, .16);    /* 分段底色 / 按压高亮 */
+    --menu-line: rgba(60, 60, 67, .14); /* 菜单内发丝线 */
+    --fill: rgba(120, 120, 128, .16);  /* 分段底色 / 按压高亮 */
     --accent: #007AFF;
     --danger: #FF3B30;
     --nav-bg: rgba(248, 248, 248, .84);
@@ -56,18 +56,12 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
-  button {
-    font: inherit;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
+  button { font: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   :where(button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ========== 导航栏（毛玻璃 + 发丝线） ========== */
   .navbar {
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    position: sticky; top: 0; z-index: 50;
     padding-top: env(safe-area-inset-top);
     background: var(--nav-bg);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -76,179 +70,102 @@
   }
   .nav-inner {
     position: relative;
-    max-width: 480px;
-    margin: 0 auto;
-    height: 44px;
-    padding: 0 6px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    max-width: 480px; margin: 0 auto; height: 44px; padding: 0 6px;
+    display: flex; align-items: center; justify-content: space-between;
   }
   .nav-side { width: 40px; flex: none; }
   .nav-title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 62%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -.2px;
+    position: absolute; left: 50%; transform: translateX(-50%);
+    max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 17px; font-weight: 600; letter-spacing: -.2px;
   }
   .nav-btn {
-    width: 40px;
-    height: 44px;
-    display: grid;
-    place-items: center;
-    border: 0;
-    background: none;
-    color: var(--accent);
-    cursor: pointer;
+    width: 40px; height: 44px;
+    display: grid; place-items: center;
+    border: 0; background: none; color: var(--accent); cursor: pointer;
   }
   .nav-btn:active { opacity: .4; }
   .nav-btn svg { width: 22px; height: 22px; }
 
   /* ========== 页面骨架（手机宽度列） ========== */
   .page {
-    max-width: 480px;
-    margin: 0 auto;
+    max-width: 480px; margin: 0 auto;
     padding: 14px 16px calc(44px + env(safe-area-inset-bottom));
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    display: flex; flex-direction: column; gap: 18px;
   }
 
   /* ========== 分组小标题 / 小注脚 ========== */
   .sec-head {
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--text-2);
-    letter-spacing: .2px;
-    padding: 0 16px;
-    margin-bottom: 7px;
+    font-size: 13px; font-weight: 400; color: var(--text-2);
+    letter-spacing: .2px; padding: 0 16px; margin-bottom: 7px;
   }
   .sec-foot {
-    font-size: 12px;
-    color: var(--text-2);
-    line-height: 1.55;
-    text-align: center;
-    padding: 2px 28px 0;
+    font-size: 12px; color: var(--text-2); line-height: 1.55;
+    text-align: center; padding: 2px 28px 0;
   }
 
   /* ========== 分组卡片与行 ========== */
-  .card {
-    background: var(--card);
-    border-radius: 10px;
-    overflow: hidden;
-  }
+  .card { background: var(--card); border-radius: 10px; overflow: hidden; }
   #resultSection, .card { scroll-margin-top: calc(env(safe-area-inset-top) + 56px); }
-
   .preview-row {
     border-top: 1px solid var(--sep);
     padding: 10px 16px 11px;
-    font-family: var(--mono-font);
-    font-size: 13px;
-    line-height: 1.5;
+    font-family: var(--mono-font); font-size: 13px; line-height: 1.5;
     color: var(--text-2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .input-foot {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    min-height: 40px;
-    padding: 5px 16px;
-    border-top: 1px solid var(--sep);
+    display: flex; justify-content: flex-end; align-items: center;
+    min-height: 40px; padding: 5px 16px; border-top: 1px solid var(--sep);
   }
-  .counter {
-    font-size: 12px;
-    color: var(--text-2);
-    font-variant-numeric: tabular-nums;
-  }
+  .counter { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
 
   /* ========== 分段控件（模式切换：编码 / 解码） ========== */
   .segmented {
     position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    height: 32px;
-    padding: 2px;
-    background: var(--fill);
-    border-radius: 9px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    height: 32px; padding: 2px;
+    background: var(--fill); border-radius: 9px;
   }
   .seg-thumb {
-    position: absolute;
-    top: 2px; left: 2px;
-    width: calc(50% - 2px);
-    height: calc(100% - 4px);
-    background: var(--seg-thumb);
-    border-radius: 7px;
+    position: absolute; top: 2px; left: 2px;
+    width: calc(50% - 2px); height: calc(100% - 4px);
+    background: var(--seg-thumb); border-radius: 7px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
     transition: transform .26s cubic-bezier(.3, .9, .35, 1);
   }
   .segmented[data-active="decode"] .seg-thumb { transform: translateX(100%); }
   .seg-btn {
-    position: relative;
-    z-index: 1;
-    height: 100%;
-    border: 0;
-    background: none;
-    border-radius: 7px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-2);
-    cursor: pointer;
-    transition: color .2s;
+    position: relative; z-index: 1;
+    height: 100%; border: 0; background: none; border-radius: 7px;
+    font-size: 14px; font-weight: 600; color: var(--text-2);
+    cursor: pointer; transition: color .2s;
   }
   .seg-btn.is-active { color: var(--text); }
 
   /* ========== iOS 风格下拉（自绘，非原生 select） ========== */
   /* 触发行：Settings 式「标签 …… 当前值 >」 */
   .dropdown-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 46px;
-    padding: 7px 16px;
-    border: 0;
-    background: none;
-    color: var(--text);
-    font-size: 17px;
-    cursor: pointer;
-    text-align: left;
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; min-height: 46px; padding: 7px 16px;
+    border: 0; background: none; color: var(--text);
+    font-size: 17px; cursor: pointer; text-align: left;
   }
   .dropdown-row:active { background: var(--fill); }
-  .dd-value-wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-  }
+  .dd-value-wrap { display: inline-flex; align-items: center; gap: 7px; }
   .dd-value { color: var(--accent); }
   .dd-chevron {
-    width: 13px;
-    height: 13px;
-    color: var(--text-3);
+    width: 13px; height: 13px; color: var(--text-3);
     transition: transform .28s cubic-bezier(.3, .9, .35, 1);
   }
   .dropdown-row[aria-expanded="true"] .dd-chevron { transform: rotate(180deg); }
 
   /* 透明遮罩：仅用于捕获菜单外部的点击 / 触摸 */
-  .dropdown-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 140;
-    background: transparent;
-  }
+  .dropdown-overlay { position: fixed; inset: 0; z-index: 140; background: transparent; }
 
   /* 菜单浮层：毛玻璃 + 圆角 + 指向箭头，从锚点缩放入场 */
   .dropdown-menu {
-    position: fixed;
-    z-index: 150;
+    position: fixed; z-index: 150;
     border-radius: 13px;
     background: var(--alert-bg);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
@@ -258,45 +175,24 @@
     animation: menuIn .24s cubic-bezier(.32, .72, 0, 1);
   }
   .dropdown-menu.is-above { transform-origin: calc(100% - 26px) 100%; }
-  .dropdown-menu.closing {
-    opacity: 0;
-    transform: scale(.96);
-    transition: opacity .16s ease, transform .16s ease;
-  }
+  .dropdown-menu.closing { opacity: 0; transform: scale(.96); transition: opacity .16s ease, transform .16s ease; }
   @keyframes menuIn { from { opacity: 0; transform: scale(.94); } }
 
   /* 内层列表负责裁剪按压高亮，外层保持可见以容纳突出的箭头 */
-  .dd-list {
-    border-radius: 13px;
-    overflow: hidden;
-  }
+  .dd-list { border-radius: 13px; overflow: hidden; }
   .dd-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 48px;
-    padding: 0 16px;
-    border: 0;
-    background: none;
-    color: var(--text);
-    font-size: 17px;
-    cursor: pointer;
-    text-align: left;
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; min-height: 48px; padding: 0 16px;
+    border: 0; background: none; color: var(--text);
+    font-size: 17px; cursor: pointer; text-align: left;
   }
   .dd-item + .dd-item { border-top: .5px solid var(--menu-line); }
   .dd-item:active { background: var(--fill); }
-  @media (hover: hover) {
-    .dd-item:hover { background: var(--fill); }
-  }
+  @media (hover: hover) { .dd-item:hover { background: var(--fill); } }
   .dd-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .dd-check {
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    color: var(--accent);
-    visibility: hidden;
+    display: grid; place-items: center;
+    width: 20px; height: 20px; color: var(--accent); visibility: hidden;
   }
   .dd-item[aria-checked="true"] .dd-check { visibility: visible; }
   .dd-check svg { width: 15px; height: 15px; }
@@ -304,11 +200,8 @@
   /* 指向箭头：旋转 45° 的小方块，只描外侧两条边，
    * 与菜单内侧重合的一半无边框，接缝不可见 */
   .dd-arrow {
-    position: absolute;
-    top: -6.5px;
-    right: 20px;
-    width: 13px;
-    height: 13px;
+    position: absolute; top: -6.5px; right: 20px;
+    width: 13px; height: 13px;
     background: var(--alert-bg);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     backdrop-filter: blur(30px) saturate(180%);
@@ -317,10 +210,8 @@
     transform: rotate(45deg);
   }
   .dropdown-menu.is-above .dd-arrow {
-    top: auto;
-    bottom: -6.5px;
-    border-top: 0;
-    border-left: 0;
+    top: auto; bottom: -6.5px;
+    border-top: 0; border-left: 0;
     border-bottom: .5px solid var(--menu-line);
     border-right: .5px solid var(--menu-line);
   }
@@ -328,114 +219,66 @@
   /* ========== 输入区 ========== */
   .field { position: relative; }
   .field textarea {
-    display: block;
-    width: 100%;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    resize: none;
-    font: inherit;
-    font-size: 17px;
-    line-height: 1.5;
-    color: var(--text);
-    caret-color: var(--accent);
-    min-height: 108px;
-    max-height: 320px;
-    overflow-y: auto;
+    display: block; width: 100%;
+    border: 0; outline: 0; background: transparent; resize: none;
+    font: inherit; font-size: 17px; line-height: 1.5;
+    color: var(--text); caret-color: var(--accent);
+    min-height: 108px; max-height: 320px; overflow-y: auto;
     padding: 12px 16px 14px;
   }
   .field textarea::placeholder { color: var(--text-3); }
-  .field.mono textarea {
-    font-family: var(--mono-font);
-    font-size: 15px;
-    letter-spacing: .2px;
-  }
+  .field.mono textarea { font-family: var(--mono-font); font-size: 15px; letter-spacing: .2px; }
   .field.has-text textarea { padding-right: 46px; }
   .field-clear {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 22px;
-    height: 22px;
-    border: 0;
-    border-radius: 50%;
-    background: var(--fill);
-    color: var(--text-2);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
+    position: absolute; top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    border: 0; border-radius: 50%;
+    background: var(--fill); color: var(--text-2);
+    display: grid; place-items: center; cursor: pointer;
   }
   .field-clear:active { opacity: .5; }
   .field-clear svg { width: 11px; height: 11px; }
 
   /* ========== 主按钮 ========== */
   .primary-btn {
-    height: 50px;
-    border: 0;
-    border-radius: 12px;
-    background: var(--accent);
-    color: #FFF;
-    font-size: 17px;
-    font-weight: 600;
-    cursor: pointer;
+    height: 50px; border: 0; border-radius: 12px;
+    background: var(--accent); color: #FFF;
+    font-size: 17px; font-weight: 600; cursor: pointer;
     transition: opacity .12s, transform .12s;
   }
   .primary-btn:active { opacity: .75; transform: scale(.98); }
   .primary-btn:disabled { opacity: .32; pointer-events: none; }
-  @media (hover: hover) {
-    .primary-btn:not(:disabled):hover { opacity: .9; }
-  }
+  @media (hover: hover) { .primary-btn:not(:disabled):hover { opacity: .9; } }
 
   /* ========== 结果区 ========== */
   #styleSection:not([hidden]) { animation: sectionIn .3s cubic-bezier(.25, .9, .3, 1); }
   #resultSection.reveal { animation: rise .34s cubic-bezier(.25, .9, .3, 1); }
   @keyframes sectionIn { from { opacity: 0; transform: translateY(8px); } }
   @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
-
   .output {
     padding: 13px 16px 15px;
-    font-size: 16px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
-    max-height: min(320px, 44vh);
-    overflow-y: auto;
+    font-size: 16px; line-height: 1.6;
+    white-space: pre-wrap; overflow-wrap: break-word;
+    max-height: min(320px, 44vh); overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
   .output.mono {
-    font-family: var(--mono-font);
-    font-size: 15px;
-    letter-spacing: .2px;
+    font-family: var(--mono-font); font-size: 15px; letter-spacing: .2px;
     word-break: break-all;
   }
-  .result-actions {
-    display: flex;
-    border-top: 1px solid var(--sep);
-  }
+  .result-actions { display: flex; border-top: 1px solid var(--sep); }
   .result-actions button {
-    flex: 1;
-    min-height: 46px;
-    border: 0;
-    background: none;
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--accent);
-    cursor: pointer;
+    flex: 1; min-height: 46px; border: 0; background: none;
+    font-size: 16px; font-weight: 500; color: var(--accent); cursor: pointer;
   }
   .result-actions button + button { border-left: 1px solid var(--sep); }
   .result-actions button:active { background: var(--fill); }
-  @media (hover: hover) {
-    .result-actions button:hover { opacity: .72; }
-  }
+  @media (hover: hover) { .result-actions button:hover { opacity: .72; } }
 
   /* ========== iOS 系统弹窗 ========== */
   .alert-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    display: grid;
-    place-items: center;
-    padding: 32px;
+    position: fixed; inset: 0; z-index: 200;
+    display: grid; place-items: center; padding: 32px;
     background: rgba(0, 0, 0, .38);
     animation: alertFadeIn .2s ease;
   }
@@ -445,9 +288,7 @@
     background: var(--alert-bg);
     -webkit-backdrop-filter: blur(30px);
     backdrop-filter: blur(30px);
-    border-radius: 14px;
-    overflow: hidden;
-    text-align: center;
+    border-radius: 14px; overflow: hidden; text-align: center;
     box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
     animation: alertPop .3s cubic-bezier(.32, .72, 0, 1);
     transition: transform .18s ease, opacity .18s ease;
@@ -457,75 +298,57 @@
   @keyframes alertPop { from { transform: scale(1.16); opacity: 0; } }
   .alert-title {
     padding: 20px 18px 0;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--text);
+    font-size: 17px; font-weight: 600; line-height: 1.3; color: var(--text);
   }
   .alert-message {
     padding: 10px 18px 20px;
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--text-2);
+    font-size: 13px; line-height: 1.5; color: var(--text-2);
     white-space: pre-line;
   }
   .alert-sheet.no-title .alert-message { padding-top: 20px; }
   .alert-actions { display: flex; border-top: 1px solid var(--sep-strong); }
   .alert-actions.is-stacked { flex-direction: column; }
   .alert-btn {
-    flex: 1;
-    min-height: 46px;
-    padding: 8px 10px;
-    border: 0;
-    background: none;
-    cursor: pointer;
-    font-size: 17px;
-    font-weight: 400;
-    color: var(--accent);
+    flex: 1; min-height: 46px; padding: 8px 10px;
+    border: 0; background: none; cursor: pointer;
+    font-size: 17px; font-weight: 400; color: var(--accent);
   }
   .alert-btn + .alert-btn { border-left: 1px solid var(--sep-strong); }
-  .alert-actions.is-stacked .alert-btn + .alert-btn { border-left: 0; border-top: 1px solid var(--sep-strong); }
+  .alert-actions.is-stacked .alert-btn + .alert-btn {
+    border-left: 0; border-top: 1px solid var(--sep-strong);
+  }
   .alert-btn.is-cancel { font-weight: 600; }
   .alert-btn.is-destructive { color: var(--danger); }
   .alert-btn:active { background: var(--fill); }
 
   /* ========== Toast（iOS HUD） ========== */
   .toast {
-    position: fixed;
-    left: 50%;
+    position: fixed; left: 50%;
     bottom: calc(28px + env(safe-area-inset-bottom));
     transform: translateX(-50%) translateY(14px);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    max-width: 82vw;
-    padding: 10px 18px;
-    border-radius: 999px;
+    display: flex; align-items: center; gap: 8px;
+    max-width: 82vw; padding: 10px 18px; border-radius: 999px;
     background: var(--toast-bg);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
-    color: #FFF;
-    font-size: 14px;
-    font-weight: 500;
-    opacity: 0;
-    pointer-events: none;
+    color: #FFF; font-size: 14px; font-weight: 500;
+    opacity: 0; pointer-events: none;
     transition: opacity .25s, transform .25s;
     z-index: 99;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast::before {
-    content: '';
-    display: none;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--danger);
-    flex: none;
+    content: ''; display: none;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--danger); flex: none;
   }
   .toast.is-error::before { display: block; }
 
   @media (prefers-reduced-motion: reduce) {
     .seg-thumb, .toast, .alert-overlay, .alert-sheet,
-    #styleSection, #resultSection, .dropdown-menu, .dd-chevron { transition: none; animation: none; }
+    #styleSection, #resultSection, .dropdown-menu, .dd-chevron {
+      transition: none; animation: none;
+    }
   }
 </style>
 </head>
@@ -551,8 +374,8 @@
   <!-- 模式：编码 / 解码 -->
   <div class="segmented" id="segmented" data-active="encode" role="tablist" aria-label="模式切换">
     <div class="seg-thumb" aria-hidden="true"></div>
-    <button class="seg-btn is-active" role="tab" aria-selected="true"  data-mode="encode" type="button">编码</button>
-    <button class="seg-btn"           role="tab" aria-selected="false" data-mode="decode" type="button">解码</button>
+    <button class="seg-btn is-active" role="tab" aria-selected="true" data-mode="encode" type="button">编码</button>
+    <button class="seg-btn" role="tab" aria-selected="false" data-mode="decode" type="button">解码</button>
   </div>
 
   <!-- 乱滚样式（仅编码时显示，自绘 iOS 风格下拉） -->
@@ -611,7 +434,7 @@
   'use strict';
 
   /* ==================================================================
-   * 编解码引擎 v3（纯逻辑，不碰 DOM）
+   * 编解码引擎 v4（纯逻辑，不碰 DOM）
    *
    * 设计原则：解码端绝不重放编码端的随机流。
    *
@@ -621,14 +444,21 @@
    * 这消除了“短文本补零 → 输出一串 aaaa”的统计破绽）。
    *
    * 三种样式共用同一个分块引擎，只有字母表不同：
-   *   混搭    base36（a-z + 0-9），每块 25 字符（36^25 > 2^128）
-   *   纯字母  base26（a-z），      每块 28 字符（26^28 > 2^128）
-   *   纯数字  base10（0-9），      每块 40 字符（10^40 > 2^128）
+   *   混搭   base36（a-z + 0-9），每块 25 字符（36^25 > 2^128）
+   *   纯字母 base26（a-z），      每块 28 字符（26^28 > 2^128）
+   *   纯数字 base10（0-9），      每块 40 字符（10^40 > 2^128）
    *
    * 每块在进制转换前垫一个随机高位 h，使 T = h·2^128 + v 均匀铺满
    * 整个字符空间（否则每块首字符只能落在狭窄区间，长串会暴露规律）。
    * 解码时 v = T mod 2^128，h 被自动丢弃——无需任何密钥约定，
    * 同时保证“同一句话每次编码结果都不同”。
+   *
+   * 【v4 · 尾噪声】纯字母 / 纯数字样式在负载之后追加 0..块长-1
+   * 个同表随机字符。真实乱打的长度从不整齐地落在块长的整数倍
+   * 上（比如 42 个字母、48 位数字），尾噪声让输出长度彻底任意
+   * 化。解码端由帧头自举推出精确负载长度，尾部字符直接忽略：
+   * 不参与校验，天然容忍复制时在末尾多带的杂字。旧版输出
+   * （长度恰为块长整数倍，即尾长 0）依然完全兼容可解。
    *
    * 混搭样式的伪装噪声采用“位置判定”：位置 i 是否为噪声，是
    * hash(nonce, i) < 阈值 的纯函数（附“不连续、不落前 26 位”约束）。
@@ -639,7 +469,8 @@
    * 由帧头校验和与严格 UTF-8 校验裁决；纯样式解码前会剔除全部
    * 空白（可修复被硬换行复制坏的文本），混搭则折叠空白（它自身的
    * 空格就是噪声的一部分）。
-   * ================================================================== */
+   * ==================================================================
+   */
   const Codec = (() => {
     const ALPHA26 = 'abcdefghijklmnopqrstuvwxyz';
     const ALPHA36 = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -673,6 +504,7 @@
     const hasCrypto = typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function';
     const pool = new Uint32Array(64);
     let poolPos = pool.length;
+
     function nextUint32() {
       if (!hasCrypto) return (Math.random() * 4294967296) >>> 0;
       if (poolPos >= pool.length) {
@@ -681,6 +513,7 @@
       }
       return pool[poolPos++];
     }
+
     /* 拒绝采样：保证 [0, nExclusive) 内严格均匀 */
     function randInt(nExclusive) {
       if (nExclusive <= 1) return 0;
@@ -752,18 +585,17 @@
     function makeConverter(alphabet, charsPerBlock) {
       const C = charsPerBlock;
       const BASE = BigInt(alphabet.length);
-      const P = BASE ** BigInt(C); // 恒大于 2^128
+      const P = BASE ** BigInt(C);   // 恒大于 2^128
       const digitOf = new Map();
       for (let i = 0; i < alphabet.length; i++) digitOf.set(alphabet[i], i);
-
       return {
         C,
-
+        alphabet,
         /* 块 -> C 个字符。h 的取值范围由数学保证：h·2^128 + v < base^C */
         blockToChars(block) {
           let v = 0n;
           for (let i = 0; i < BLOCK_BYTES; i++) v = (v << 8n) | BigInt(block[i]);
-          const hMax = Number((P - 1n - v) / MOD128); // ≤ 29，Number 转换无损
+          const hMax = Number((P - 1n - v) / MOD128);  // ≤ 29，Number 转换无损
           let t = BigInt(randInt(hMax + 1)) * MOD128 + v;
           const chars = new Array(C);
           for (let i = C - 1; i >= 0; i--) {
@@ -772,7 +604,6 @@
           }
           return chars.join('');
         },
-
         /* C 个字符 -> 16 字节块。T mod 2^128 自动丢弃随机高位 h */
         charsToBlock(str) {
           let T = 0n;
@@ -811,25 +642,49 @@
       return data;
     }
 
-    /* ---- 纯样式（纯字母 / 纯数字）：分块直出，无任何插入 ---- */
+    /* ---- 纯样式（纯字母 / 纯数字）：负载 + 随机尾噪声 ----
+     * 真实乱打的长度从不整齐地落在块长的整数倍上（42 个字母、
+     * 48 位数字都很自然），因此在负载之后追加 0..C-1 个同表随机
+     * 字符，让输出长度覆盖所有可能的取值。
+     *
+     * 解码端由帧头推得精确负载长度，尾部字符直接忽略：既不参与
+     * 校验，也天然容忍复制时在末尾多带的杂字。旧版输出（长度恰
+     * 为块长整数倍，即尾长 0）依然可解，完全向后兼容。 */
     function encodePure(text, conv) {
-      const frame = padFrameRandomly(buildFrame(prepare(text)));
-      return frameToPayload(frame, conv);
+      const payload = frameToPayload(padFrameRandomly(buildFrame(prepare(text))), conv);
+      const tailLen = randInt(conv.C);   // 0 .. C-1
+      let tail = '';
+      for (let i = 0; i < tailLen; i++) {
+        tail += conv.alphabet[randInt(conv.alphabet.length)];
+      }
+      return payload + tail;
     }
 
+    /* ---- 纯样式解码：自举读头 → 精确负载长 → 忽略尾噪声 ---- */
     function decodePure(s, conv) {
       const C = conv.C;
-      if (s.length === 0 || s.length % C !== 0) throw new FormatError(FMT);
-      const blocks = s.length / C;
+      if (s.length < C) throw new FormatError(FMT);
+      /* 1) 首 C 个字符就是首块，自举读出真实数据长度 */
+      const block1 = conv.charsToBlock(s.slice(0, C));
+      const len = (block1[2] << 16) | (block1[3] << 8) | block1[4];
+      if (len < 1 || len > MAX_DATA_BYTES) throw new FormatError(FMT);
+      const blocks = Math.ceil((HEADER_BYTES + len) / BLOCK_BYTES);
+      const payloadLen = blocks * C;
+      /* 2) 总长必须落在 [payloadLen, payloadLen + C)：
+       *    尾噪声 0..C-1 个，多出一个字符都判非法 */
+      if (s.length < payloadLen || s.length >= payloadLen + C) throw new FormatError(FMT);
+      /* 3) 只取前 payloadLen 个字符分块还原，尾部直接丢弃，
+       *    数据完整性依旧由帧头校验和与严格 UTF-8 把关 */
       const frame = new Uint8Array(blocks * BLOCK_BYTES);
-      for (let b = 0; b < blocks; b++) {
+      frame.set(block1, 0);
+      for (let b = 1; b < blocks; b++) {
         frame.set(conv.charsToBlock(s.slice(b * C, (b + 1) * C)), b * BLOCK_BYTES);
       }
       return parseFrame(frame);
     }
 
     /* ---- 混搭样式的位置判定噪声 ----
-     * rawNoise(nonce, i) 是 的纯函数：编码端、解码端
+     * rawNoise(nonce, i) 是 <nonce, i> 的纯函数：编码端、解码端
      * 对同一位置各自独立计算，结果必然一致，不存在需要两端
      * “对表”的随机流状态。 */
     function rawNoise(nonce, i) {
@@ -859,9 +714,8 @@
       const frame = padFrameRandomly(buildFrame(prepare(text)));
       const payload = frameToPayload(frame, MIXC);
       const nonce = (frame[0] << 8) | frame[1];
-
       /* 逐位置输出：位置 i 满足（i ≥ 26 且上一位置非噪声 且
-       * rawNoise(nonce,i) < 阈值）时插入一个噪声字符，否则输出
+       * rawNoise(nonce, i) < 阈值）时插入一个噪声字符，否则输出
        * 下一个真实字符。噪声永不连续、永不落在首块自举区、
        * 且输出恒以真实字符收尾（最后一个 payload 字符之后不再插入）。 */
       const parts = [];
@@ -885,7 +739,6 @@
 
     function decodeMix(s) {
       if (s.length < MIX_CHARS) throw new FormatError(FMT);
-
       /* 1) 自举：前 25 个字符就是首块，从中读出 nonce / 长度 */
       const block1 = MIXC.charsToBlock(s.slice(0, MIX_CHARS));
       const nonce = (block1[0] << 8) | block1[1];
@@ -893,7 +746,6 @@
       if (len < 1 || len > MAX_DATA_BYTES) throw new FormatError(FMT);
       const blocks = Math.ceil((HEADER_BYTES + len) / BLOCK_BYTES);
       const payloadLen = blocks * MIX_CHARS;
-
       /* 2) 用同一套位置判定规则剥离噪声（与编码端逐位一致） */
       const parts = [];
       let collected = 0;
@@ -909,9 +761,8 @@
         }
       }
       if (collected !== payloadLen) throw new FormatError(FMT);
-
       /* 3) 若还有剩余字符（正常输出不会有），必须全部判为噪声，
-       *    否则说明文本被拼接过额外内容，直接判非法 */
+       * 否则说明文本被拼接过额外内容，直接判非法 */
       for (; i < s.length; i++) {
         if (i >= NOISE_MIN_POS && !prevNoise && rawNoise(nonce, i) < NOISE_THRESHOLD) {
           prevNoise = true;
@@ -919,7 +770,6 @@
           throw new FormatError(FMT);
         }
       }
-
       /* 4) 分块还原字节，交由帧校验 */
       const payload = parts.join('');
       const frame = new Uint8Array(blocks * BLOCK_BYTES);
@@ -942,7 +792,7 @@
     function decode(input) {
       const raw = String(input);
       /* 两种归一化：
-       * spaced    —— 所有空白折叠为单个空格并去首尾（混搭用，空格是其噪声的一部分）
+       * spaced —— 所有空白折叠为单个空格并去首尾（混搭用，空格是其噪声的一部分）
        * collapsed —— 剔除全部空白（纯样式用，可修复被硬换行复制坏的文本）
        * 两者都做小写归一（修复 iOS 自动大写）。 */
       const spaced = raw.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -953,12 +803,14 @@
       const hasL = /[a-z]/.test(collapsed);
       const hasD = /[0-9]/.test(collapsed);
 
-      /* 候选格式按字符构成路由，依次尝试，由校验和裁决 */
+      /* 候选格式按字符构成路由，依次尝试，由校验和裁决。
+       * 纯样式不再要求长度是块长的整数倍——v4 起带随机尾噪声，
+       * 长度任意；首块自举出的帧头会给出精确的负载长度。 */
       const attempts = [];
-      if (hasL && !hasD && collapsed.length >= LETTER_CHARS && collapsed.length % LETTER_CHARS === 0) {
+      if (hasL && !hasD && collapsed.length >= LETTER_CHARS) {
         attempts.push(() => decodePure(collapsed, LETC));
       }
-      if (hasD && !hasL && collapsed.length >= DIGIT_CHARS && collapsed.length % DIGIT_CHARS === 0) {
+      if (hasD && !hasL && collapsed.length >= DIGIT_CHARS) {
         attempts.push(() => decodePure(collapsed, DIGC));
       }
       if (spaced.length >= MIX_CHARS) {
@@ -968,25 +820,37 @@
       for (const fn of attempts) {
         try {
           return fn();
-        } catch (_) {
-          /* 该格式不匹配，继续尝试下一种 */
-        }
+        } catch (_) { /* 该格式不匹配，继续尝试下一种 */ }
       }
       throw new FormatError(FMT);
     }
 
-    /* ---- 启动自检：三样式 × 多组用例的完整往返 + 篡改检测 ----
+    /* ---- 启动自检：三样式 × 多组用例的完整往返 + 尾噪声鲁棒性 + 篡改检测 ----
      * 页面上不显示任何结果；全部通过时仅写一条 console 日志，
      * 出现失败时由界面层弹出 iOS 风格错误弹窗。 */
     function selfTest() {
       const samples = [
-        'a', 'ab', 'z', 'hello world',
-        '你好，世界！', ' emoji 🎉🀄 test ',
+        'a',
+        'ab',
+        'z',
+        'hello world',
+        '你好，世界！',
+        ' emoji 🎉🀄 test ',
         'The quick brown fox jumps over the lazy dog. 0123456789 ~!@#',
-        'x'.repeat(7), 'x'.repeat(8), 'x'.repeat(15), 'x'.repeat(16),
-        'x'.repeat(17), 'x'.repeat(23), 'x'.repeat(24), 'x'.repeat(25),
-        'x'.repeat(39), 'x'.repeat(40), 'x'.repeat(41), 'x'.repeat(64),
-        '首行\n第二行\t带制表', '  前后空白  ',
+        'x'.repeat(7),
+        'x'.repeat(8),
+        'x'.repeat(15),
+        'x'.repeat(16),
+        'x'.repeat(17),
+        'x'.repeat(23),
+        'x'.repeat(24),
+        'x'.repeat(25),
+        'x'.repeat(39),
+        'x'.repeat(40),
+        'x'.repeat(41),
+        'x'.repeat(64),
+        '首行\n第二行\t带制表',
+        ' 前后空白 ',
         '混合mix123文本'.repeat(20),
       ];
       const styles = ['mix', 'letters', 'digits'];
@@ -1001,6 +865,27 @@
             if (typeof enc === 'string' && enc.length > 0 && decode(enc) === text) passed++;
           } catch (_) { /* 计为失败 */ }
         }
+      }
+
+      /* 尾噪声鲁棒性：向合法输出的末尾补满至块长上限的随机字符
+       * （即把尾部拉到 C-1 个），解码必须原样还原——尾部字符是
+       * 装饰，不参与校验，理应被完全忽略。 */
+      for (const style of ['letters', 'digits']) {
+        total++;
+        try {
+          const text = 'tail-noise-尾噪声测试';
+          const enc = encode(text, style);
+          const conv = style === 'letters' ? LETC : DIGC;
+          const alpha = style === 'letters' ? ALPHA26 : DIGIT10;
+          const dataLen = utf8encoder.encode(text).length;
+          const payloadLen = Math.ceil((HEADER_BYTES + dataLen) / BLOCK_BYTES) * conv.C;
+          const room = conv.C - 1 - (enc.length - payloadLen);
+          let probe = enc;
+          for (let i = 0; i < room; i++) {
+            probe += alpha[randInt(alpha.length)];
+          }
+          if (decode(probe) === text) passed++;
+        } catch (_) { /* 计为失败 */ }
       }
 
       /* 篡改检测：改动首块内一个字符（落在数据区，必触发校验失败） */
@@ -1030,7 +915,8 @@
    * 单按钮整行、双按钮等宽、三个及以上纵向堆叠。
    * 支持键盘 Esc 关闭、Tab 循环聚焦、打开时锁定页面滚动、
    * 关闭后焦点归还触发元素。仅通过按钮关闭（与系统行为一致）。
-   * ================================================================== */
+   * ==================================================================
+   */
   const Alert = (() => {
     let current = null;
 
@@ -1089,6 +975,7 @@
 
       const row = document.createElement('div');
       row.className = 'alert-actions' + (actions.length > 2 ? ' is-stacked' : '');
+
       const buttons = actions.map(act => {
         const b = document.createElement('button');
         b.type = 'button';
@@ -1100,6 +987,7 @@
         row.appendChild(b);
         return b;
       });
+
       sheet.appendChild(row);
       overlay.appendChild(sheet);
       document.body.appendChild(overlay);
@@ -1111,6 +999,7 @@
         closing: false,
         onKey: null,
       };
+
       alert.onKey = (e) => {
         if (e.key === 'Escape') {
           e.preventDefault();
@@ -1151,12 +1040,12 @@
    *   关闭后焦点归还触发行。
    * - 无障碍：触发器 aria-haspopup / aria-expanded，
    *   菜单 role="menu"，菜单项 role="menuitemradio" + aria-checked。
-   * ================================================================== */
+   * ==================================================================
+   */
   const Dropdown = (() => {
     const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>';
-    const VIEW_MARGIN = 8;    // 菜单与视口边缘的最小距离
-    const MIN_WIDTH = 220;    // 菜单最小宽度（桌面窄触发行时兜底）
-
+    const VIEW_MARGIN = 8;   // 菜单与视口边缘的最小距离
+    const MIN_WIDTH = 220;   // 菜单最小宽度（桌面窄触发行时兜底）
     let current = null;
 
     function focusEl(el) {
@@ -1172,7 +1061,7 @@
       const vh = window.innerHeight;
       const width = Math.min(Math.max(rect.width, MIN_WIDTH), vw - VIEW_MARGIN * 2);
       st.menu.style.width = width + 'px';
-      const h = st.menu.offsetHeight; /* transform 不影响布局，可直接测量 */
+      const h = st.menu.offsetHeight;  /* transform 不影响布局，可直接测量 */
       const spaceBelow = vh - rect.bottom - VIEW_MARGIN;
       const spaceAbove = rect.top - VIEW_MARGIN;
       const below = spaceBelow >= h || spaceBelow >= spaceAbove;
@@ -1248,17 +1137,13 @@
         list.appendChild(row);
         return { row, value: item.value, checked };
       });
+
       menu.appendChild(list);
       document.body.append(overlay, menu);
 
       const st = {
-        trigger,
-        overlay,
-        menu,
-        entries,
-        raf: 0,
-        onKey: null,
-        onReposition: null,
+        trigger, overlay, menu, entries,
+        raf: 0, onKey: null, onReposition: null,
       };
 
       /* 滚动 / 缩放时菜单位置始终跟随触发行（rAF 节流） */
@@ -1295,7 +1180,6 @@
       document.addEventListener('keydown', st.onKey, true);
       window.addEventListener('scroll', st.onReposition, true);
       window.addEventListener('resize', st.onReposition);
-
       trigger.setAttribute('aria-expanded', 'true');
       current = st;
 
@@ -1319,7 +1203,8 @@
 
   /* ==================================================================
    * 界面交互
-   * ================================================================== */
+   * ==================================================================
+   */
   const $ = id => document.getElementById(id);
   const els = {
     aboutBtn: $('aboutBtn'),
@@ -1344,27 +1229,19 @@
   };
 
   const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const state = {
     mode: 'encode',
     style: 'mix',
     resultText: '',
-    charset: 'abcdefghijklmnopqrstuvwxyz0123456789 ', // 落定动画的跳变字符集
+    charset: 'abcdefghijklmnopqrstuvwxyz0123456789 ',  // 落定动画的跳变字符集
   };
 
   /* 乱滚样式：名称、示例预览、跳变字符集、主按钮文案 */
   const STYLE_INFO = {
-    mix: {
-      name: '混搭',
-      preview: 'kxjdjd kwiwkxh 5 jdjdjd skjxhjdh 8 wkkx…',
-    },
-    letters: {
-      name: '纯字母',
-      preview: 'idhdksjwnxuhdkwiwkxhixjdjdhdjdhbb…',
-    },
-    digits: {
-      name: '纯数字',
-      preview: '646431521846754813516424578463161…',
-    },
+    mix:     { name: '混搭',   preview: 'kxjdjd kwiwkxh 5 jdjdjd skjxhjdh 8 wkkx…' },
+    letters: { name: '纯字母', preview: 'dkdbdugwjdockhsiwgiqwuyroejgficjxhdhdjcncj…' },
+    digits:  { name: '纯数字', preview: '373249184976704643848846637382864945247697846134697…' },
   };
   const CHARSET_BY_STYLE = {
     mix: 'abcdefghijklmnopqrstuvwxyz0123456789 ',
@@ -1410,7 +1287,7 @@
     els.inputArea.setAttribute('aria-label', c.inputLabel);
     els.inputArea.setAttribute('autocapitalize', mode === 'decode' ? 'none' : 'sentences');
     els.inputField.classList.toggle('mono', mode === 'decode');
-    els.styleSection.hidden = mode !== 'encode'; // 样式选择只在编码时出现
+    els.styleSection.hidden = mode !== 'encode';  // 样式选择只在编码时出现
     updateActionLabel();
     els.resultSection.hidden = true;
     els.resultSection.classList.remove('reveal');
@@ -1489,7 +1366,7 @@
   function revealResult() {
     els.resultSection.hidden = false;
     els.resultSection.classList.remove('reveal');
-    void els.resultSection.offsetWidth; // 重新触发入场动画
+    void els.resultSection.offsetWidth;  // 重新触发入场动画
     els.resultSection.classList.add('reveal');
   }
 
@@ -1549,25 +1426,25 @@
    * 拷贝：新旧浏览器双通道
    *
    * 新浏览器 —— 异步剪贴板 API（navigator.clipboard.writeText），
-   *             权限提示更友好、不依赖临时 DOM；
+   * 权限提示更友好、不依赖临时 DOM；
    * 旧浏览器 —— execCommand('copy') 旧路径，并处理 iOS Safari 的
-   *             经典陷阱：
-   *             · 隐藏元素无法被选中：用 1px 透明 + fixed 定位，
-   *               绝不能 display:none / visibility:hidden；
-   *             · 聚焦缩放：临时输入框字号 ≥ 16px；
-   *             · 选区污染：拷贝前保存用户当前选区，结束后还原；
-   *             · 触发时机：必须在同一个用户手势的任务内执行。
+   * 经典陷阱：
+   *   · 隐藏元素无法被选中：用 1px 透明 + fixed 定位，
+   *     绝不能 display:none / visibility:hidden；
+   *   · 聚焦缩放：临时输入框字号 ≥ 16px；
+   *   · 选区污染：拷贝前保存用户当前选区，结束后还原；
+   *   · 触发时机：必须在同一个用户手势的任务内执行。
    *
    * 两条通道之间自动降级：新 API 缺失、非安全上下文、权限被拒
    * 等任何失败，都静默落入旧路径；两路径全部失败才报错。
-   * ================================================================== */
+   * ==================================================================
+   */
   function legacyCopyText(text) {
     /* execCommand 在极老或受限环境下可能不存在，先探测 */
     if (typeof document.execCommand !== 'function') return false;
-
     const ta = document.createElement('textarea');
     ta.value = text;
-    ta.setAttribute('readonly', ''); /* iOS 上可避免唤出软键盘 */
+    ta.setAttribute('readonly', '');  /* iOS 上可避免唤出软键盘 */
     ta.style.cssText = [
       'position:fixed',
       'top:0',
@@ -1581,14 +1458,17 @@
       'box-shadow:none',
       'background:transparent',
       'opacity:0',
-      'font-size:16px', /* ≥16px，避免 iOS 聚焦时页面缩放 */
+      'font-size:16px',  /* ≥16px，避免 iOS 聚焦时页面缩放 */
     ].join(';');
 
     /* 保存用户当前选区，拷贝完成后还原 */
-    const sel = (typeof window.getSelection === 'function') ? window.getSelection() : null;
+    const sel = (typeof window.getSelection === 'function')
+      ? window.getSelection()
+      : null;
     let savedRange = null;
     if (sel && sel.rangeCount > 0) {
-      try { savedRange = sel.getRangeAt(0).cloneRange(); } catch (_) { savedRange = null; }
+      try { savedRange = sel.getRangeAt(0).cloneRange(); }
+      catch (_) { savedRange = null; }
     }
 
     document.body.appendChild(ta);
@@ -1621,9 +1501,7 @@
       try {
         await clip.writeText(text);
         return true;
-      } catch (_) {
-        /* 权限被拒 / 非安全上下文 / 文档失焦等：落入旧路径 */
-      }
+      } catch (_) { /* 权限被拒 / 非安全上下文 / 文档失焦等：落入旧路径 */ }
     }
     /* 通道二：execCommand 旧路径（旧浏览器 / 新 API 不可用场景） */
     return legacyCopyText(text);
@@ -1661,7 +1539,10 @@
     onSelect: value => setStyle(value),
   });
 
-  els.inputArea.addEventListener('input', () => { updateMeta(); autoGrow(); });
+  els.inputArea.addEventListener('input', () => {
+    updateMeta();
+    autoGrow();
+  });
 
   els.clearBtn.addEventListener('click', () => {
     els.inputArea.value = '';
@@ -1689,7 +1570,7 @@
     updateMeta();
     autoGrow();
     setMode(state.mode === 'encode' ? 'decode' : 'encode');
-    runAction(); // 结果出现后会自动滚动到位
+    runAction();  // 结果出现后会自动滚动到位
   });
 
   /* ---------- 初始化 ---------- */
@@ -1707,7 +1588,9 @@
     try {
       const t = Codec.selfTest();
       if (t.passed === t.total) {
-        try { console.info('[自言文字编码] 引擎自检通过 ' + t.passed + '/' + t.total); } catch (_) { /* 忽略 */ }
+        try {
+          console.info('[自言文字编码] 引擎自检通过 ' + t.passed + '/' + t.total);
+        } catch (_) { /* 忽略 */ }
       } else {
         Alert.show({
           title: '引擎自检未通过',
